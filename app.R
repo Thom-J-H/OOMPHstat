@@ -556,7 +556,7 @@ server <- function(input, output, session) {
                     colour = "brown",
                     label = paste0("z: ",
                                    formatC(
-                                       round(z_fun(), 4),
+                                       round(z, 4),
                                        format = "f",
                                        digits = 2
                                    ))
