@@ -1,6 +1,6 @@
 #    ---------------------------------------------------------------------    #
 #                                                                             #
-#   App:    "Surf Stat" Statistics Visualizer: Normal and t-Distributions     #
+#   App:    "Surf Stat" Statistics Visualizer: Normal and t-distributions     #
 #                                                                             #
 #   ----------------------------------------------------------------------    #
 #                                                                             #
@@ -189,7 +189,7 @@ t_row1 <- fluidRow(t_input_box, t_plot_box)
 
 # 4. t Distribution tab
 t_tab <- tabItem(tabName = "t",
-                 h2("The t Distribution"),
+                 h2(uiOutput("t_header")),
                  t_row1)
 
 
@@ -233,7 +233,7 @@ sidebar <- dashboardSidebar(sidebarMenu(
         icon = icon("bell")
     ),
     menuItem(
-        "The T Distribution",
+        span("The ", em("t") ,"-distribution"),
         tabName = "t",
         icon = icon("tshirt")
     ),
@@ -255,29 +255,24 @@ ui <- dashboardPage(header, sidebar, body)
 
 
 server <- function(input, output, session) {
-    email <- a("xander@berkeley.edu",
-               href = "mailto:xander@berkeley.edu")
-    
-    school <- a("UC Berkeley School of Public Health",
-                href = "https://publichealth.berkeley.edu/")
-    
+
     xvalues <- data.frame(x = c(-3, 3))
-    
+
     observe({
         # define input access objects
         z <- ifelse(input$norm_tail == "middle" | input$norm_tail == "two",
-                    ifelse(input$z == 0, 0.01, input$z), input$z) 
+                    ifelse(input$z == 0, 0.01, input$z), input$z)
         nt <- input$norm_tail
         na <- input$norm_arrow
-        nu <- ifelse(input$norm_area > 0 & input$norm_area < 1, 
+        nu <- ifelse(input$norm_area > 0 & input$norm_area < 1,
                      input$norm_area,
                      ifelse(input$norm_area == 0 | input$norm_area < 0, 0.01, 0.99))
-        
 
-        
-        
+
+
+
         #### NORMAL DISTRIBUTION SERVER LOGIC ####
-        
+
         #### dnorm_tail ####
         # ggplot statistical function for shading area under Normal curve
         dnorm_tail <- reactive({
@@ -311,7 +306,7 @@ server <- function(input, output, session) {
                 }
             }
         })
-        
+
         #### norm_area_fun ####
         # function to compute area under t curve from t-statistic
         norm_area_fun <- reactive({
@@ -343,7 +338,7 @@ server <- function(input, output, session) {
                 )
             }
         })
-        
+
         #### z_fun ####
         # function to compute t-statistic from area under the curve
         z_fun <- reactive({
@@ -379,7 +374,7 @@ server <- function(input, output, session) {
                 digits = 5)
             }
         })
-        
+
         #### norm_area_value ####
         norm_area_value <- reactive({
             req(z)
@@ -398,7 +393,7 @@ server <- function(input, output, session) {
                 }
             }
         })
-        
+
         norm_area_label <- reactive({
             req(z)
             if (na == "down") {
@@ -408,7 +403,7 @@ server <- function(input, output, session) {
                 c("Enter Area Under the Curve (0 to 1)")
             }
         })
-        
+
         z_value <- reactive({
             req(nu)
             if (na == "up") {
@@ -433,7 +428,7 @@ server <- function(input, output, session) {
                 }
             }
         })
-        
+
         z_label <- reactive({
             req(z)
             if (na == "up") {
@@ -448,7 +443,7 @@ server <- function(input, output, session) {
                 }
             }
         })
-        
+
         nu_min <- reactive({
             req(z)
             if (na == "down") {
@@ -458,7 +453,7 @@ server <- function(input, output, session) {
                 c(0.00001)
             }
         })
-        
+
         nu_max <- reactive({
             req(z)
             if (na == "down") {
@@ -468,7 +463,7 @@ server <- function(input, output, session) {
                 c(0.99999)
             }
         })
-        
+
         z_min <- reactive({
             req(nu)
             if (na == "up") {
@@ -488,7 +483,7 @@ server <- function(input, output, session) {
                 }
             }
         })
-        
+
         z_max <- reactive({
             req(nu)
             if (na == "up") {
@@ -498,7 +493,7 @@ server <- function(input, output, session) {
                 c(NA)
             }
         })
-        
+
         norm_plot_area_label <- reactive({
             if ((round(norm_area_fun(), 4) * 100) < 0.01) {
                 paste0("Area: ", c(
@@ -513,8 +508,8 @@ server <- function(input, output, session) {
                 paste0("Area: ", round(norm_area_fun(), 4) * 100, "%")
             }
         })
-        
-        
+
+
         updateNumericInput(
             session,
             "z",
@@ -523,7 +518,7 @@ server <- function(input, output, session) {
             min = z_min(),
             max = z_max()
         )
-        
+
         updateNumericInput(
             session,
             "norm_area",
@@ -532,7 +527,7 @@ server <- function(input, output, session) {
             min = nu_min(),
             max = nu_max()
         )
-        
+
         output$normPlot <- renderPlot({
             ggplot(xvalues, aes(x = xvalues$x)) +
                 stat_function(fun = dnorm, size = .9) +
@@ -589,21 +584,29 @@ server <- function(input, output, session) {
                                    breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
                 scale_y_continuous(breaks = NULL)
         })
-    })    
-        
-        #### T DISTRIBUTION SERVER LOGIC ####
-    
-    observe({    
-        
+    })
+
+        #### t-distribution Server Logic ####
+
+    observe({
+
         t <- input$t
         df <- ifelse(input$df > 0, input$df, 1)
         tt <- input$t_tail
         ta <- input$t_arrow
         tu <- input$t_area
-        
+
+        output$t_header <- renderUI({
+            h2("The ", em("t"), "-distribution")
+        })
+
+        df_fun <- reactive({
+            input$df
+        })
+
         #### dt_tail ####
         # ggplot statistical function for shading area under Normal curve
-        
+
         dt_density <- reactive({
             req(t)
             req(df)
@@ -644,7 +647,7 @@ server <- function(input, output, session) {
                 }
             }
         })
-        
+
         #### t_area_fun ####
         # function to compute area under t curve from t-statistic
         t_area_fun <- reactive({
@@ -696,7 +699,7 @@ server <- function(input, output, session) {
                 )
             }
         })
-        
+
         #### t_fun ####
         # function to compute t-statistic from area under the curve
         t_fun <- reactive({
@@ -736,7 +739,7 @@ server <- function(input, output, session) {
                 digits = 5)
             }
         })
-        
+
         #### t_area_value ####
         t_area_value <- reactive({
             req(t)
@@ -756,7 +759,7 @@ server <- function(input, output, session) {
                 }
             }
         })
-        
+
         t_area_label <- reactive({
             req(t)
             req(df)
@@ -767,7 +770,7 @@ server <- function(input, output, session) {
                 c("Enter Area Under the Curve (0 to 1)")
             }
         })
-        
+
         t_value <- reactive({
             req(tu)
             req(df)
@@ -793,23 +796,23 @@ server <- function(input, output, session) {
                 }
             }
         })
-        
+
         t_label <- reactive({
             req(t)
             req(df)
             if (ta == "up") {
-                c("T-Statistic")
+                c("t-statistic")
             }
             else if (ta == "down") {
                 if (tt == "left" | tt == "right") {
-                    c("Enter T-Statistic")
+                    c("Enter t-statistic")
                 }
                 else if (tt == "middle" | tt == "two") {
-                    c("Enter T-Statistic (Positive)")
+                    c("Enter t-statistic (Positive)")
                 }
             }
         })
-        
+
         tu_min <- reactive({
             req(t)
             req(df)
@@ -820,7 +823,7 @@ server <- function(input, output, session) {
                 c(0.00001)
             }
         })
-        
+
         tu_max <- reactive({
             req(t)
             req(df)
@@ -831,7 +834,7 @@ server <- function(input, output, session) {
                 c(0.99999)
             }
         })
-        
+
         t_min <- reactive({
             req(tu)
             req(df)
@@ -847,7 +850,7 @@ server <- function(input, output, session) {
                 }
             }
         })
-        
+
         t_max <- reactive({
             req(t)
             req(tu)
@@ -859,7 +862,7 @@ server <- function(input, output, session) {
                 c(NA)
             }
         })
-        
+
         t_plot_area_label <- reactive({
             req(t)
             req(tu)
@@ -875,17 +878,17 @@ server <- function(input, output, session) {
                 paste0("Area: ", round(t_area_fun(), 4) * 100, "%")
             }
         })
-        
+
         t_plot_title <- reactive({
             req(df)
             if (df == 1) {
-                paste0("T Distribution with ", df, " Degree of Freedom")
+                expression(italic("t")~"-distribution with"~df~"Degree of Freedom")
             }
             else {
-                paste0("T Distribution with ", df, " Degrees of Freedom")
-            }    
+                bquote(em("t")~"-distribution" ~ "with" ~ df ~ "Degrees of Freedom")
+            }
         })
-        
+
         df_value <- reactive({
             req(df)
             req(t)
@@ -897,7 +900,7 @@ server <- function(input, output, session) {
                 c(df)
             }
         })
-        
+
         updateNumericInput(
             session,
             "t",
@@ -906,7 +909,7 @@ server <- function(input, output, session) {
             min = t_min(),
             max = t_max()
         )
-        
+
         updateNumericInput(
             session,
             "t_area",
@@ -915,7 +918,7 @@ server <- function(input, output, session) {
             min = tu_min(),
             max = tu_max()
         )
-        
+
         updateNumericInput(
             session,
             "df",
@@ -932,7 +935,9 @@ server <- function(input, output, session) {
                     fill = "orange",
                     alpha = 0.5
                 ) +
-                labs(x = "\n T-Statistic (t)",
+                xlab(expression(italic("t")~ "-statistic (t)")) +
+                labs(
+                    # x = " \n t-statistic (t)",
                      y = "",
                      title = t_plot_title()) +
                 geom_text(
@@ -979,12 +984,24 @@ server <- function(input, output, session) {
                                    breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4)) +
                 scale_y_continuous(breaks = NULL)
         })
-        
+
+        #### uiOutput objects ####
+        email <- a("xander@berkeley.edu",
+                   href = "mailto:xander@berkeley.edu")
+
+        school <- a("UC Berkeley School of Public Health",
+                    href = "https://publichealth.berkeley.edu/")
+
+        github <- a("Github.",
+                    href = "https://github.com/posnerab/surfstat target=_blank",
+                    rel="noopener noreferrer",
+                    target = "_blank",
+                    )
+
         output$contact <- renderUI({
-            tagList(p("© 2019 Xander Posner, ", email), p(school))
-        })
-        output$code <- renderUI({
-            c("Code")
+            tagList(p("© 2019 Xander Posner, ", email),
+                    p(school),
+                    p("Check out the source code on ", github))
         })
     }) # closes out top-level server observe({})
 } # closes out server function{}
