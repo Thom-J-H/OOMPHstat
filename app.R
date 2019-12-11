@@ -558,7 +558,7 @@ server <- function(input, output, session) {
                                    formatC(
                                        round(z, 4),
                                        format = "f",
-                                       digits = 2
+                                       digits = 3
                                    ))
                 ) +
                 theme(
