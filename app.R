@@ -244,7 +244,15 @@ sidebar <- dashboardSidebar(sidebarMenu(
     )
 ))
 
-body <- dashboardBody(tabItems(norm_tab, t_tab, source_tab))
+# 16x16 pixel favicon (icon next to site name in web browser tab)
+favicon <- titlePanel(
+    title = tags$head(
+        tags$link(rel="shortcut icon",
+                  href="https://raw.githubusercontent.com/posnerab/surfstat/master/www/favicon.ico",
+                  type="www/favicon.ico")))
+
+body <- dashboardBody(favicon,
+                      tabItems(norm_tab, t_tab, source_tab))
 
 ui <- dashboardPage(header, sidebar, body)
 
