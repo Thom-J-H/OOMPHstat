@@ -5,9 +5,9 @@ account: xandersph
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1569647
-bundleId: 2652216
+bundleId: 2660512
 url: https://xandersph.shinyapps.io/Norm_dist_demo/
-when: 1575890259.62111
+when: 1576110594.73456
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: .RData|styles.css|www/bootstrap.css|www/styles.css
+ignoredFiles: .RData|LICENSE|README.md
