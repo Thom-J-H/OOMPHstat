@@ -1042,7 +1042,7 @@ server <- function(input, output, session) {
                     href = "https://publichealth.berkeley.edu/")
 
         github <- a("Github.",
-                    href = "https://github.com/posnerab/surfstat target=_blank",
+                    href = "https://github.com/posnerab/surfstathub",
                     rel = "noopener noreferrer",
                     target = "_blank",)
 
