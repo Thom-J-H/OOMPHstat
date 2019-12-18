@@ -5,8 +5,8 @@ account: xandersph
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1597938
-bundleId: 2666198
+bundleId: 2679038
 url: https://xandersph.shinyapps.io/surfstathub/
-when: 1576271137.89258
+when: 1576694378.84681
 asMultiple: FALSE
 asStatic: FALSE
