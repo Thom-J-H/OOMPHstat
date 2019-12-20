@@ -28,7 +28,10 @@
 # libraries required
 library(shiny)
 library(shinydashboard)
-library(ggplot2)
+library(stats)
+library(readxl)
+library(rsconnect)
+library(tidyverse)
 
 
 ################################# Norm Tab UI #################################
@@ -134,8 +137,8 @@ t_input_box <- box(
             numericInput(
                 "df",
                 "Enter Degrees of Freedom",
-                value = 1,
-                min = 1,
+                value = 2,
+                min = 2,
                 max = NA,
                 step = 1
             )
@@ -147,7 +150,7 @@ t_input_box <- box(
                 "t",
                 "Enter T-Statistic",
                 value = 1,
-                min = NA,
+                min = 2,
                 max = NA,
                 step = 0.25
             ),
@@ -188,7 +191,7 @@ t_plot_box <- box(
 t_row1 <- fluidRow(t_input_box, t_plot_box)
 
 # 4. t Distribution tab
-t_tab <- tabItem(tabName = "t",
+t_tab <- tabItem(tabName = "ttab",
                  h2(uiOutput("t_header")),
                  t_row1)
 
@@ -221,6 +224,102 @@ source_tab <- tabItem(tabName = "source",
                       h2("Project Info"),
                       source_row1)
 
+
+################################# CLT Tab UI #################################
+
+
+# 1. CLT yellow Inputs box
+clt_input_box <- box(
+    title = "Inputs",
+    status = "warning",
+    solidHeader = TRUE,
+    collapsible = TRUE,
+    # verticalLayout(
+    # box(
+    # Pop. parameter radio buttons box
+    radioButtons(
+        inputId = "par",
+        label = "Population Parameter",
+        choices = c("Mean" = "mean",
+                    "Proportion" = "prop"),
+        inline = TRUE
+    ),
+    radioButtons(
+        "dist",
+        "Distribution of Source Population",
+        choices = c(
+            "Uniform" = "unif",
+            "Roughly Symmetric" = "norm",
+            "Slightly Skewed" = "sskew",
+            "Highly Skewed" = "skew",
+            "Binomial" = "binom"
+        )
+    ),
+    selectInput(
+        "var",
+        "Variable",
+        choices = c(
+            "Age" = "age",
+            "Height" = "height",
+            "SAT Scores" = "SAT",
+            "Annual Income" = "income",
+            "MediCal Costs: Hip & Knee Replacements" = "hip",
+            "Annual Income: LA County" = "LA",
+            "Current Smoker" = "smoke"
+        )
+    ),
+    # ),
+    # Slider inputs box
+    # box(
+    # Source pop. size slider input
+    sliderInput(
+        "pop_size",
+        "Population Size",
+        value = 10000,
+        step = 10000,
+        min = 10000,
+        max = 100000
+    ),
+    # Sample size slider input
+    sliderInput(
+        'sampleSize',
+        'Sample Size',
+        value = 10,
+        step = 10,
+        min = 10,
+        max = 500
+    ),
+    # Number of samples slider input
+    sliderInput(
+        "iterate",
+        "Sampling Iteration",
+        value = 10,
+        step = 10,
+        min = 10,
+        max = 1000
+    )
+    # )
+    # )
+)
+
+# 2. CLT blue Plot box
+clt_plot_box <- box(
+    plotOutput("plot_pop"),
+    plotOutput("plot_smpl_mean"),
+    title = "Plot",
+    status = "primary",
+    solidHeader = TRUE,
+    collapsible = TRUE
+)
+
+# 3. norm first row
+clt_row1 <- fluidRow(clt_input_box, clt_plot_box)
+
+# 4. Normal Distribution tab
+clt_tab <- tabItem(tabName = "clt",
+                   h2("Central Limit Theorem"),
+                   clt_row1)
+
 ################################ Dashboard UI #################################
 
 header <- dashboardHeader(title = "Surf Stat",
@@ -234,8 +333,13 @@ sidebar <- dashboardSidebar(sidebarMenu(
     ),
     menuItem(
         span("The ", em("t") , "-distribution"),
-        tabName = "t",
+        tabName = "ttab",
         icon = icon("tshirt")
+    ),
+    menuItem(
+        "The Central Limit Theorem",
+        tabName = "clt",
+        icon = icon("align-center")
     ),
     menuItem(
         "Project Info",
@@ -245,14 +349,14 @@ sidebar <- dashboardSidebar(sidebarMenu(
 ))
 
 # 16x16 pixel favicon (icon next to site name in web browser tab)
-favicon <- titlePanel(
-    title = tags$head(
-        tags$link(rel="shortcut icon",
-                  href="https://raw.githubusercontent.com/posnerab/surfstat/master/www/favicon.ico",
-                  type="www/favicon.ico")))
+favicon <- titlePanel(title = tags$head(
+    tags$link(rel = "shortcut icon",
+              href = "https://raw.githubusercontent.com/posnerab/surfstathub/master/www/favicon.ico",
+              type = "www/favicon.ico")
+))
 
 body <- dashboardBody(favicon,
-                      tabItems(norm_tab, t_tab, source_tab))
+                      tabItems(norm_tab, t_tab, source_tab, clt_tab))
 
 ui <- dashboardPage(header, sidebar, body)
 
@@ -611,13 +715,11 @@ server <- function(input, output, session) {
                                    breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
                 scale_y_continuous(breaks = NULL)
         })
-    })
 
-    #### t-distribution Server Logic ####
+        #### T-DISTRIBUTION SERVER LOGIC ####
 
-    observe({
         t <- input$t
-        df <- ifelse(input$df > 0, input$df, 1)
+        df <- ifelse(input$df > 1, input$df, 2)
         tt <- input$t_tail
         ta <- input$t_arrow
         tu <- input$t_area
@@ -920,22 +1022,16 @@ server <- function(input, output, session) {
             req(t)
             req(tu)
             if (df == 1) {
-                bquote(
-                        italic("t") ~
-                       "-distribution with" ~
-                       .(df) ~
-                       "degree of freedom"
-                    )
-                # )
-                # expression(italic("t") ~ "-distribution with" ~ df ~ "Degree of Freedom")
+                bquote(italic("t") ~
+                           "-distribution with" ~
+                           .(df) ~
+                           "degree of freedom")
             }
             else {
-                bquote(
-                        italic("t") ~
-                       "-distribution with" ~
-                       .(df) ~
-                       "degrees of freedom"
-                    )
+                bquote(italic("t") ~
+                           "-distribution with" ~
+                           .(df) ~
+                           "degrees of freedom")
             }
         })
 
@@ -943,8 +1039,8 @@ server <- function(input, output, session) {
             req(df)
             req(t)
             req(tu)
-            if (df == 0) {
-                c(1)
+            if (df == 1) {
+                c(2)
             }
             else {
                 c(df)
@@ -1007,7 +1103,7 @@ server <- function(input, output, session) {
                                    formatC(
                                        round(t_fun(), 4),
                                        format = "f",
-                                       digits = 2
+                                       digits = 3
                                    ))
                 ) +
                 theme(
@@ -1044,21 +1140,217 @@ server <- function(input, output, session) {
         github <- a("Github.",
                     href = "https://github.com/posnerab/surfstathub",
                     rel = "noopener noreferrer",
-                    target = "_blank",)
+                    target = "_blank")
 
         output$contact <- renderUI({
-            tagList(p("© 2019 Xander Posner, ", email),
-                    p("MPH '20 | Epidemiology & Biostatistics"),
-                    p(school))
+            tagList(
+                p("© 2019 Xander Posner, ", email),
+                p("MPH '20 | Epidemiology & Biostatistics"),
+                p(school)
+            )
         })
 
         output$code <- renderUI({
-            tagList(p("This Shiny app was made in RStudio"),
-                    p("Check out the source code on ", github))
+            tagList(
+                p("This Shiny app was made in RStudio"),
+                p("Check out the source code on ", github)
+            )
         })
 
-    }) # closes out top-level server observe({})
-} # closes out server function{}
 
+        #### CLT SERVER LOGIC ####
+        y <- input$par
+        dist_choices <- reactive({
+            if (y == "prop") {
+                c("Binomial" = "binom")
+            }
+            else {
+                c(
+                    "Uniform" = "unif",
+                    "Roughly Symmetric" = "norm",
+                    "Slightly Skewed" = "sskew",
+                    "Highly Skewed" = "skew"
+                )
+            }
+        })
+        updateRadioButtons(session = session,
+                           inputId = "dist",
+                           choices = dist_choices())
+
+        x <- input$dist
+        var_choices <- reactive({
+            if (x == "binom") {
+                c("Current Smoker" = "smoke")
+            }
+            else if (x == "unif") {
+                c("Age" = "age")
+            }
+            else if (x == "norm") {
+                c("Height" = "height",
+                  "SAT Scores" = "SAT")
+            }
+            else if (x == "sskew") {
+                c(
+                    "Annual Income" = "income",
+                    "MediCal Costs: Hip & Knee Replacements" = "hip"
+                )
+            }
+            else {
+                c("Annual Income: LA County" = "LA")
+            }
+        })
+        updateSelectInput(session = session,
+                          inputId = "var",
+                          choices = var_choices())
+
+        population <- reactive({
+            hip <- read_excel("data/medicare.xlsx",
+                              col_names = TRUE) %>%
+                filter(
+                    State == "CA",
+                    Procedure == "469 - MAJOR HIP AND KNEE JOINT REPLACEMENT OR REATTACHMENT OF LOWER EXTREM"
+                )
+
+            data <- read.csv("data/data.csv",
+                             header = TRUE)
+
+            smoking <- read.csv("data/smoking.csv",
+                                header = TRUE)
+
+            if (input$var == "height") {
+                rnorm(
+                    n = input$pop_size,
+                    mean = mean(data$Height),
+                    sd = sd(data$Height)
+                )
+            }
+            else if (input$var == "SAT") {
+                sample(
+                    x = data$SAT,
+                    size = input$pop_size,
+                    replace = TRUE
+                )
+
+            }
+            else if (input$var == "age") {
+                sample(
+                    x = data$Age,
+                    size = input$pop_size,
+                    replace = TRUE
+                )
+            }
+            else if (input$var == "income") {
+                sample(
+                    x = data$Income,
+                    size = input$pop_size,
+                    replace = TRUE
+                )
+            }
+            else if (input$var == "hip") {
+                sample(
+                    x = hip$Charges,
+                    size = input$pop_size,
+                    replace = TRUE
+                )
+            }
+            else if (input$var == "LA") {
+                sample(
+                    x = data$Income,
+                    size = input$pop_size,
+                    replace = TRUE
+                )
+            }
+            else {
+                sample(
+                    x = smoking$smokes,
+                    size = input$pop_size,
+                    replace = TRUE
+                )
+            }
+        }) # population reactive
+
+        smpl_mean <- reactive({
+            for (i in 1:input$iterate) {
+                if (i == 1) {
+                    smpl_mean <- c(mean(sample(
+                        population(),
+                        input$sampleSize, T
+                    )))
+                }
+                else {
+                    smpl_mean <-
+                        c(smpl_mean, mean(sample(
+                            population(),
+                            input$sampleSize, T
+                        )))
+                }
+            }
+            smpl_mean
+        }) # smpl_mean reactive
+
+        ax_choices <- reactive({
+            if (input$var == "age") {
+                c("Age (Years)")
+            }
+            else if (input$var == "height") {
+                c("Height (Inches)")
+            }
+            else if (input$var == "SAT") {
+                c("SAT Scores (400-1600)")
+            }
+            else if (input$var == "hip") {
+                c("Average Charges Per Hospital, CA ($)")
+            }
+            else if (input$var == "smoke") {
+                c("Proportion Current Smokers (1 = Yes, 0 = No)")
+            }
+            else {
+                c("Annual Income ($)")
+            }
+        })
+        titles <- reactive({
+            if (input$var == "smoke") {
+                c("Sample Proportion Histogram and Density Plot")
+            }
+            else {
+                c("Sample Mean Histogram and Density Plot")
+            }
+        })
+
+        output$plot_pop <- renderPlot({
+            plot(
+                density(population()),
+                axes = FALSE,
+                xlab = "",
+                ylab = "",
+                main = ""
+            )
+            par(new = TRUE)
+            hist(population(),
+                 main = "Population Histogram and Density Plot",
+                 xlab = ax_choices())
+            abline(v = mean(population()),
+                   col = "blue",
+                   lwd = 2)
+        })
+
+        output$plot_smpl_mean <- renderPlot({
+            plot(
+                density(smpl_mean()),
+                axes = FALSE,
+                xlab = "",
+                ylab = "",
+                main = ""
+            )
+            par(new = TRUE)
+            hist(smpl_mean(),
+                 main = titles(),
+                 xlab = ax_choices())
+            abline(v = mean(smpl_mean()),
+                   col = "blue",
+                   lwd = 2)
+        })
+    }) # closes out top level observe function
+}
 # Run the application
 shinyApp(ui = ui, server = server)
