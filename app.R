@@ -253,7 +253,8 @@ clt_input_box <- box(
             "Slightly Skewed" = "sskew",
             "Highly Skewed" = "skew",
             "Binomial" = "binom"
-        )
+        ),
+        selected = "unif"
     ),
     selectInput(
         "var",
@@ -266,7 +267,8 @@ clt_input_box <- box(
             "MediCal Costs: Hip & Knee Replacements" = "hip",
             "Annual Income: LA County" = "LA",
             "Current Smoker" = "smoke"
-        )
+        ),
+        selected = "age"
     ),
     # ),
     # Slider inputs box
@@ -367,10 +369,12 @@ ui <- dashboardPage(header, sidebar, body)
 
 
 server <- function(input, output, session) {
+
     xvalues <- data.frame(x = c(-3, 3))
 
+
     observe({
-        # define input access objects
+        #### Input Access Objects ####
         z <-
             ifelse(
                 input$norm_tail == "middle" | input$norm_tail == "two",
@@ -385,9 +389,13 @@ server <- function(input, output, session) {
             ifelse(input$norm_area == 0 |
                        input$norm_area < 0, 0.01, 0.99)
         )
-
-
-
+        x <- input$dist
+        y <- input$par
+        t <- input$t
+        df <- ifelse(input$df > 1, input$df, 2)
+        tt <- input$t_tail
+        ta <- input$t_arrow
+        tu <- input$t_area
 
         #### NORMAL DISTRIBUTION SERVER LOGIC ####
 
@@ -658,7 +666,7 @@ server <- function(input, output, session) {
             min = nu_min(),
             max = nu_max()
         )
-
+        #### NORM PLOT ####
         output$normPlot <- renderPlot({
             ggplot(xvalues, aes(x = xvalues$x)) +
                 stat_function(fun = dnorm, size = .9) +
@@ -717,12 +725,6 @@ server <- function(input, output, session) {
         })
 
         #### T-DISTRIBUTION SERVER LOGIC ####
-
-        t <- input$t
-        df <- ifelse(input$df > 1, input$df, 2)
-        tt <- input$t_tail
-        ta <- input$t_arrow
-        tu <- input$t_area
 
         output$t_header <- renderUI({
             h2("The ", em("t"), "-distribution")
@@ -1101,7 +1103,7 @@ server <- function(input, output, session) {
                     colour = "brown",
                     label = paste0("t: ",
                                    formatC(
-                                       round(t_fun(), 4),
+                                       round(t, 4),
                                        format = "f",
                                        digits = 3
                                    ))
@@ -1130,37 +1132,15 @@ server <- function(input, output, session) {
                 scale_y_continuous(breaks = NULL)
         })
 
-        #### uiOutput objects ####
-        email <- a("xander@berkeley.edu",
-                   href = "mailto:xander@berkeley.edu")
-
-        school <- a("UC Berkeley School of Public Health",
-                    href = "https://publichealth.berkeley.edu/")
-
-        github <- a("Github.",
-                    href = "https://github.com/posnerab/surfstathub",
-                    rel = "noopener noreferrer",
-                    target = "_blank")
-
-        output$contact <- renderUI({
-            tagList(
-                p("© 2019 Xander Posner, ", email),
-                p("MPH '20 | Epidemiology & Biostatistics"),
-                p(school)
-            )
-        })
-
-        output$code <- renderUI({
-            tagList(
-                p("This Shiny app was made in RStudio"),
-                p("Check out the source code on ", github)
-            )
-        })
 
 
         #### CLT SERVER LOGIC ####
-        y <- input$par
+
+
         dist_choices <- reactive({
+            # req(y)
+            # req(x)
+            # req(input$var)
             if (y == "prop") {
                 c("Binomial" = "binom")
             }
@@ -1173,12 +1153,38 @@ server <- function(input, output, session) {
                 )
             }
         })
+
+        dist_selected <- reactive({
+            if (y == "prop") {
+                c("Binomial" = "binom")
+            }
+            else if (y == "mean") {
+                if (x == "unif") {
+                    c("Uniform" = "unif")
+                }
+                else if (x == "norm") {
+                    c("Roughly Symmetric" = "norm")
+                }
+                else if (x == "sskew") {
+                    c("Slightly Skewed" = "sskew")
+                }
+                else if (x == "skew") {
+                    c("Highly Skewed" = "skew")
+                }
+            }
+        })
+
+
         updateRadioButtons(session = session,
                            inputId = "dist",
-                           choices = dist_choices())
+                           choices = dist_choices(),
+                           selected = dist_selected())
 
-        x <- input$dist
+
         var_choices <- reactive({
+            # req(y)
+            # req(x)
+            # req(input$var)
             if (x == "binom") {
                 c("Current Smoker" = "smoke")
             }
@@ -1199,11 +1205,38 @@ server <- function(input, output, session) {
                 c("Annual Income: LA County" = "LA")
             }
         })
+
+        var_selected <- reactive({
+            # req(y)
+            # req(x)
+            if (y == "prop") {
+                c("Current Smoker" = "smoke")
+            }
+            else if (x == "unif") {
+                c("Age" = "age")
+            }
+            else if (x == "norm") {
+                c("Height" = "height")
+            }
+            else if (x == "sskew") {
+                c("Annual Income" = "income")
+            }
+            else {
+                c("Annual Income: LA County" = "LA")
+            }
+            # c(input$var)
+        })
+
         updateSelectInput(session = session,
                           inputId = "var",
-                          choices = var_choices())
+                          choices = var_choices(),
+                          selected = var_selected())
 
         population <- reactive({
+            # req(y)
+            # req(x)
+            # req(input$var)
+
             hip <- read_excel("data/medicare.xlsx",
                               col_names = TRUE) %>%
                 filter(
@@ -1270,6 +1303,9 @@ server <- function(input, output, session) {
         }) # population reactive
 
         smpl_mean <- reactive({
+            # req(y)
+            # req(x)
+            # req(input$var)
             for (i in 1:input$iterate) {
                 if (i == 1) {
                     smpl_mean <- c(mean(sample(
@@ -1289,6 +1325,9 @@ server <- function(input, output, session) {
         }) # smpl_mean reactive
 
         ax_choices <- reactive({
+            # req(y)
+            # req(x)
+            # req(input$var)
             if (input$var == "age") {
                 c("Age (Years)")
             }
@@ -1308,7 +1347,11 @@ server <- function(input, output, session) {
                 c("Annual Income ($)")
             }
         })
+
         titles <- reactive({
+            # req(y)
+            # req(x)
+            # req(input$var)
             if (input$var == "smoke") {
                 c("Sample Proportion Histogram and Density Plot")
             }
@@ -1350,6 +1393,34 @@ server <- function(input, output, session) {
                    col = "blue",
                    lwd = 2)
         })
+
+        #### uiOutput objects ####
+        email <- a("xander@berkeley.edu",
+                   href = "mailto:xander@berkeley.edu")
+
+        school <- a("UC Berkeley School of Public Health",
+                    href = "https://publichealth.berkeley.edu/",
+                    target = "_blank")
+
+        github <- a("Github.",
+                    href = "https://github.com/posnerab/surfstathub",
+                    target = "_blank")
+
+        output$contact <- renderUI({
+            tagList(
+                p("© 2019 Xander Posner, ", email),
+                p("MPH '20 | Epidemiology & Biostatistics"),
+                p(school)
+            )
+        })
+
+        output$code <- renderUI({
+            tagList(
+                p("This Shiny app was made in RStudio"),
+                p("Check out the source code on ", github)
+            )
+        })
+
     }) # closes out top level observe function
 }
 # Run the application
