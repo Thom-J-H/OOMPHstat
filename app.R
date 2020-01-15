@@ -1006,16 +1006,22 @@ server <- function(input, output, session) {
             req(t)
             req(tu)
             req(df)
+
+            if (ta == "up") {
+                paste0("Area: ", round(t_area_fun(), 6) * 100, "%")
+            }
+            else {
             if ((round(t_area_fun(), 4) * 100) < 0.01) {
                 paste0("Area: ", c(formatC(
                     t_area_fun(),
                     format = "e",
-                    digits = 3
+                    digits = 4
                 )))
             }
             else {
                 paste0("Area: ",
                        round(t_area_fun(), 4) * 100, "%")
+            }
             }
         })
 
@@ -1105,7 +1111,7 @@ server <- function(input, output, session) {
                                    formatC(
                                        round(t, 4),
                                        format = "f",
-                                       digits = 3
+                                       digits = 4
                                    ))
                 ) +
                 theme(
