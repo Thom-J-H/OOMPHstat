@@ -196,6 +196,88 @@ t_tab <- tabItem(tabName = "ttab",
                  t_row1)
 
 
+################################### Chi Tab UI ##################################
+
+
+# 1. Chi yellow Inputs box
+chi_input_box <- box(
+    title = "Inputs",
+    status = "warning",
+    solidHeader = TRUE,
+    collapsible = TRUE,
+    fluidRow(
+        # Tail type radio buttons box
+        box(
+            radioButtons(
+                "chi_tail",
+                "Type",
+                choices = c(
+                    "Right-Tailed" = "right"
+                ),
+                selected = "right"
+            ),
+            numericInput(
+                "chidf",
+                "Enter Degrees of Freedom",
+                value = 2,
+                min = 2,
+                max = NA,
+                step = 1
+            )
+        ),
+        # Numeric inputs left box
+        box(
+            # Chi-squared-statistic numeric input widget
+            numericInput(
+                "chi",
+                "Enter Chi-Squared Statistic",
+                value = 1,
+                min = 1,
+                max = NA,
+                step = 0.25
+            ),
+            # Arrow icons radio buttons
+            radioButtons(
+                "chi_arrow",
+                NULL,
+                choiceNames = list(icon("arrow-up"),
+                                   icon("arrow-down")),
+                choiceValues = list("up",
+                                    "down"),
+                inline = TRUE,
+                selected = "down"
+            ),
+            # Area numeric inputs widget
+            numericInput(
+                "chi_area",
+                "Area Under the Curve",
+                value = 0.8413,
+                min = 0,
+                max = 1,
+                step = 0.01
+            )
+        )
+    )
+)
+
+# 2. blue chi Plot box
+chi_plot_box <- box(
+    plotOutput("chiPlot"),
+    title = "Plot",
+    status = "primary",
+    solidHeader = TRUE,
+    collapsible = TRUE
+)
+
+# 3. chi first row
+chi_row1 <- fluidRow(chi_input_box, chi_plot_box)
+
+# 4. chi Distribution tab
+chi_tab <- tabItem(tabName = "chitab",
+                 h2("The Chi-Squared Distribution"),
+                 chi_row1)
+
+
 ################################ Source Tab UI ################################
 
 # Source tab contact info box
@@ -339,6 +421,11 @@ sidebar <- dashboardSidebar(sidebarMenu(
         icon = icon("tshirt")
     ),
     menuItem(
+        "The Chi-Squared Distribution",
+        tabName = "chitab",
+        icon = icon("times")
+    ),
+    menuItem(
         "The Central Limit Theorem",
         tabName = "clt",
         icon = icon("align-center")
@@ -358,7 +445,7 @@ favicon <- titlePanel(title = tags$head(
 ))
 
 body <- dashboardBody(favicon,
-                      tabItems(norm_tab, t_tab, source_tab, clt_tab))
+                      tabItems(norm_tab, t_tab, chi_tab, clt_tab, source_tab))
 
 ui <- dashboardPage(header, sidebar, body)
 
@@ -371,6 +458,7 @@ ui <- dashboardPage(header, sidebar, body)
 server <- function(input, output, session) {
 
     xvalues <- data.frame(x = c(-3, 3))
+    chixvalues <- data.frame(chix = c(-2, 6))
 
 
     observe({
@@ -391,11 +479,17 @@ server <- function(input, output, session) {
         )
         x <- input$dist
         y <- input$par
+
         t <- input$t
         df <- ifelse(input$df > 1, input$df, 2)
         tt <- input$t_tail
         ta <- input$t_arrow
         tu <- input$t_area
+
+        chi <- input$chi
+        chidf <- input$chidf
+        chia <- input$chi_arrow
+        chiu <- input$chi_area
 
         #### NORMAL DISTRIBUTION SERVER LOGIC ####
 
@@ -1139,6 +1233,287 @@ server <- function(input, output, session) {
         })
 
 
+        #### CHI SERVER LOGIC ####
+
+        #### dchisq_density ####
+        # ggplot statistical function for shading area under Chi curve
+
+        dchisq_density <- reactive({
+            req(chi)
+            req(chidf)
+            req(chiu)
+            function(x) {
+                chi_den <- dchisq(x, df = chidf)
+                return(chi_den)
+            }
+        })
+        dchisq_tail <- reactive({
+            req(chi)
+            req(chidf)
+            req(chiu)
+            function(x) {
+                chisq_right <- dchisq(x, df = chidf)
+                chisq_right[x <= chi | x >= 6] <- NA
+                return(chisq_right)
+            }
+        })
+
+        #### chi_area_fun ####
+        # function to compute area under t curve from t-statistic
+        chi_area_fun <- reactive({
+            req(chidf)
+            req(chi)
+            req(chiu)
+            round(pchisq(
+                q = chi,
+                df = chidf,
+                lower.tail = FALSE
+            ),
+                digits = 5)
+        })
+
+        #### chi_fun ####
+        # function to compute chisq-statistic from area under the curve
+        chi_fun <- reactive({
+            req(chidf)
+            req(chiu)
+            round(qchisq(
+                p = chiu,
+                df = chidf,
+                lower.tail = FALSE
+            ),
+                digits = 5)
+        })
+
+        #### chi_area_value ####
+        chi_area_value <- reactive({
+            req(chi)
+            req(chidf)
+            if (chia == "down") {
+                c(round(chi_area_fun(), 5))
+            }
+            else if (chia == "up") {
+                if (chiu > 0 & chiu < 1) {
+                    c(chiu)
+                }
+                else if (chiu == 0) {
+                    c(0.01)
+                }
+                else if (chiu == 1) {
+                    c(0.99)
+                }
+            }
+        })
+
+        chi_area_label <- reactive({
+            req(chi)
+            req(chiu)
+            req(chidf)
+            if (chia == "down") {
+                c("Area Under the Curve")
+            }
+            else if (chia == "up") {
+                c("Enter Area Under the Curve (0 to 1)")
+            }
+        })
+
+        chi_value <- reactive({
+            req(chiu)
+            req(chidf)
+            req(chi)
+            if (chia == "up") {
+                if (chiu > 0 & chiu < 1) {
+                    c(round(chi_fun(), 5))
+                }
+                else {
+                    c(1)
+                }
+            }
+            else if (chia == "down") {
+                    c(chi)
+                }
+        })
+
+        chi_label <- reactive({
+            req(chi)
+            req(chidf)
+            req(chiu)
+            if (chia == "up") {
+                c("Chi-Squared Statistic")
+            }
+            else if (chia == "down") {
+                    c("Enter Chi-Squared Statistic")
+                }
+        })
+
+        chiu_min <- reactive({
+            req(chi)
+            req(chidf)
+            req(chiu)
+            if (chia == "down") {
+                c(round(chi_area_fun(), 5))
+            }
+            else if (chia == "up") {
+                c(0.00001)
+            }
+        })
+
+        chiu_max <- reactive({
+            req(chi)
+            req(chidf)
+            req(chiu)
+            if (chia == "down") {
+                c(round(chi_area_fun(), 5))
+            }
+            else if (chia == "up") {
+                c(0.99999)
+            }
+        })
+
+        chi_min <- reactive({
+            req(chiu)
+            req(chidf)
+            req(chi)
+            if (chia == "up") {
+                c(round(chi_fun(), 5))
+            }
+            else if (ta == "down") {
+                    c(NA)
+                }
+        })
+
+        chi_max <- reactive({
+            req(chi)
+            req(chiu)
+            req(chidf)
+            if (chia == "up") {
+                c(round(chi_fun(), 5))
+            }
+            else if (chia == "down") {
+                c(NA)
+            }
+        })
+
+        chi_plot_area_label <- reactive({
+            req(chi)
+            req(chiu)
+            req(chidf)
+
+            if (chia == "up") {
+                bquote("Area: "~.(round(chi_area_fun(), 6) * 100)~"%")
+            }
+            else {
+                if ((round(chi_area_fun(), 4) * 100) < 0.01) {
+                    bquote("Area: "~.(c(formatC(
+                        chi_area_fun(),
+                        format = "e",
+                        digits = 4
+                    ))))
+                }
+                else {
+                    paste0("Area: ",
+                           round(chi_area_fun(), 4) * 100, "%")
+                }
+            }
+        })
+
+        chi_plot_title <- reactive({
+            req(chidf)
+            req(chi)
+            req(chiu)
+            bquote("Chi-Squared Distribution with" ~
+                       .(chidf) ~
+                       "Degrees of Freedom")
+        })
+
+        chidf_value <- reactive({
+            req(chidf)
+            req(chi)
+            req(chiu)
+                c(chidf)
+        })
+
+        updateNumericInput(
+            session,
+            "chi",
+            label = chi_label(),
+            value = chi_value(),
+            min = chi_min(),
+            max = chi_max()
+        )
+
+        updateNumericInput(
+            session,
+            "chi_area",
+            label = chi_area_label(),
+            value = chi_area_value(),
+            min = chiu_min(),
+            max = chiu_max()
+        )
+
+        updateNumericInput(session,
+                           "chidf",
+                           value = chidf_value())
+
+        #### CHI PLOT ####
+        output$chiPlot <- renderPlot({
+            ggplot(chixvalues, aes(x = chixvalues$chix)) +
+                stat_function(fun = dchisq_density(),
+                              size = .9,
+                              na.rm = TRUE) +
+                stat_function(
+                    fun = dchisq_tail(),
+                    geom = "area",
+                    fill = "green",
+                    alpha = 0.5
+                ) +
+                labs(x = expression(paste("Chi-Squared Statistic ", "(", chi^2, ")")),
+                    y = "",
+                    title = chi_plot_title()) +
+                geom_text(
+                    x = -1.25,
+                    y = 0.15,
+                    size = 6,
+                    fontface = "bold",
+                    colour = "brown",
+                    label = chi_plot_area_label()
+                ) +
+                geom_text(
+                    x = -1.25,
+                    y = 0.1,
+                    size = 6,
+                    fontface = "bold",
+                    colour = "brown",
+                    label = bquote(bold(paste(chi^2~": "~
+                                   .(formatC(
+                                       round(chi, 4),
+                                       format = "f",
+                                       digits = 4))
+                                   )))
+                ) +
+                theme(
+                    plot.title = element_text(
+                        face = "bold",
+                        size = 16,
+                        hjust = 0.5
+                    ),
+                    axis.title.x = element_text(
+                        face = "bold",
+                        colour = "brown",
+                        size = 14
+                    ),
+                    axis.title.y = element_text(
+                        face = "bold",
+                        colour = "brown",
+                        size = 12
+                    ),
+                    panel.grid.minor = element_blank(),
+                    panel.grid.major = element_blank()
+                ) +
+                scale_x_continuous(limits = c(-2, 6),
+                                   breaks = c(-2, -1, 0, 1, 2, 3, 4, 5, 6))
+                # scale_y_continuous(breaks = NULL)
+        })
 
         #### CLT SERVER LOGIC ####
 
