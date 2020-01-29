@@ -84,11 +84,17 @@ norm_input_box <- box(
             numericInput(
                 "norm_area",
                 "Area Under the Curve",
-                value = 0.8413,
+                value = 0,
                 min = 0,
                 max = 1,
                 step = 0.01
-            )
+            ),
+            radioButtons("action",
+                         NULL,
+                         choices = c("Submit" = "go",
+                                     "Clear" = "reset"),
+                         selected = "reset"
+                         )
         )
     )
 )
@@ -477,6 +483,7 @@ server <- function(input, output, session) {
             ifelse(input$norm_area == 0 |
                        input$norm_area < 0, 0.01, 0.99)
         )
+        act <- input$action
         x <- input$dist
         y <- input$par
 
@@ -491,13 +498,15 @@ server <- function(input, output, session) {
         chia <- input$chi_arrow
         chiu <- input$chi_area
 
+
+
         #### NORMAL DISTRIBUTION SERVER LOGIC ####
 
         #### dnorm_tail ####
         # ggplot statistical function for shading area under Normal curve
         dnorm_tail <- reactive({
-            req(z)
-            req(nu)
+            # req(z)
+            # req(nu)
             if (nt == "left") {
                 function(x) {
                     norm_left <- dnorm(x)
@@ -529,10 +538,10 @@ server <- function(input, output, session) {
         })
 
         #### norm_area_fun ####
-        # function to compute area under t curve from t-statistic
+        # function to compute area under normal curve from z-score
         norm_area_fun <- reactive({
             req(z)
-            req(nu)
+         #   req(nu)
             if (nt == "left") {
                 round(pnorm(q = z,
                             lower.tail = TRUE),
@@ -564,7 +573,7 @@ server <- function(input, output, session) {
         #### z_fun ####
         # function to compute t-statistic from area under the curve
         z_fun <- reactive({
-            req(z)
+           # req(z)
             req(nu)
             if (nt == "left") {
                 round(qnorm(p = nu,
@@ -601,11 +610,11 @@ server <- function(input, output, session) {
         #### norm_area_value ####
         norm_area_value <- reactive({
             req(z)
-            req(nu)
-            if (na == "down") {
-                c(round(norm_area_fun(), 5))
+          #  req(nu)
+            if (input$action == "reset" & na == "down") {
+                c(0)
             }
-            else if (na == "up") {
+            else if (input$action == "reset" & na == "up") {
                 if (nu > 0 & nu < 1) {
                     c(nu)
                 }
@@ -616,6 +625,20 @@ server <- function(input, output, session) {
                     c(0.99)
                 }
             }
+            else if (input$action == "go" & na == "down") {
+                    c(round(norm_area_fun(), 5))
+                }
+            else if (input$action == "go" & na == "up") {
+                    if (nu > 0 & nu < 1) {
+                        c(nu)
+                    }
+                    else if (nu == 0) {
+                        c(0.01)
+                    }
+                    else if (nu == 1) {
+                        c(0.99)
+                    }
+                }
         })
 
         norm_area_label <- reactive({
@@ -630,17 +653,33 @@ server <- function(input, output, session) {
         })
 
         z_value <- reactive({
-            req(z)
+        #    req(z)
             req(nu)
-            if (na == "up") {
-                if (nu > 0 & nu < 1 & z != 0) {
-                    c(round(z_fun(), 5))
+            if (input$action == "reset" & na == "up") {
+                    c(0)
                 }
-                else {
-                    c(1)
+            else if (input$action == "reset" & na == "down") {
+                if (nt == "left" | nt == "right") {
+                        c(z)
+                    }
+                    else if (nt == "middle" | nt == "two") {
+                        if (z > 0) {
+                            c(z)
+                        }
+                        else if (z < 0) {
+                            c(-z)
+                        }
+                    }
                 }
-            }
-            else if (na == "down") {
+            else if (input$action == "go" & na == "up") {
+                    if (nu > 0 & nu < 1 & z != 0) {
+                        c(round(z_fun(), 5))
+                    }
+                    else {
+                        c(1)
+                    }
+                }
+            else if (input$action == "go" & na == "down") {
                 if (nt == "left" | nt == "right") {
                     c(z)
                 }
@@ -673,7 +712,6 @@ server <- function(input, output, session) {
 
         nu_min <- reactive({
             req(z)
-            req(nu)
             if (na == "down") {
                 c(round(norm_area_fun(), 5))
             }
@@ -684,7 +722,6 @@ server <- function(input, output, session) {
 
         nu_max <- reactive({
             req(z)
-            req(nu)
             if (na == "down") {
                 c(round(norm_area_fun(), 5))
             }
@@ -695,7 +732,6 @@ server <- function(input, output, session) {
 
         z_min <- reactive({
             req(nu)
-            req(z)
             if (na == "up") {
                 if (nt == "middle" | nt == "two") {
                     c(0.00001)
@@ -716,7 +752,6 @@ server <- function(input, output, session) {
 
         z_max <- reactive({
             req(nu)
-            req(z)
             if (na == "up") {
                 c(round(z_fun(), 5))
             }
@@ -761,62 +796,102 @@ server <- function(input, output, session) {
             max = nu_max()
         )
         #### NORM PLOT ####
-        output$normPlot <- renderPlot({
-            ggplot(xvalues, aes(x = xvalues$x)) +
-                stat_function(fun = dnorm, size = .9) +
-                stat_function(
-                    fun = dnorm_tail(),
-                    geom = "area",
-                    fill = "red",
-                    alpha = 0.3
-                ) +
-                labs(x = "\n Z-Score (z)",
-                     y = "",
-                     title = "Standard Normal Distribution \n") +
-                geom_text(
-                    x = 2.1,
-                    y = 0.3,
-                    size = 6,
-                    fontface = "bold",
-                    colour = "brown",
-                    label = norm_plot_area_label()
-                ) +
-                geom_text(
-                    x = 2.1,
-                    y = 0.25,
-                    size = 6,
-                    fontface = "bold",
-                    colour = "brown",
-                    label = paste0("z: ",
-                                   formatC(
-                                       round(z, 4),
-                                       format = "f",
-                                       digits = 3
-                                   ))
-                ) +
-                theme(
-                    plot.title = element_text(
-                        face = "bold",
-                        size = 16,
-                        hjust = 0.5
-                    ),
-                    axis.title.x = element_text(
-                        face = "bold",
-                        colour = "brown",
-                        size = 14
-                    ),
-                    axis.title.y = element_text(
-                        face = "bold",
-                        colour = "brown",
-                        size = 12
-                    ),
-                    panel.grid.minor = element_blank(),
-                    panel.grid.major = element_blank()
-                ) +
-                scale_x_continuous(limits = c(-3, 3),
-                                   breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
-                scale_y_continuous(breaks = NULL)
-        })
+       # null_norm_plot <-
+
+
+       # norm_plot <-
+
+
+            if (input$action == "go") {
+                output$normPlot <- renderPlot({
+                    ggplot(xvalues, aes(x = xvalues$x)) +
+                        stat_function(fun = dnorm, size = .9) +
+                        stat_function(
+                            fun = dnorm_tail(),
+                            geom = "area",
+                            fill = "red",
+                            alpha = 0.3
+                        ) +
+                        labs(x = "\n Z-Score (z)",
+                             y = "",
+                             title = "Standard Normal Distribution \n") +
+                        geom_text(
+                            x = 2.1,
+                            y = 0.3,
+                            size = 6,
+                            fontface = "bold",
+                            colour = "brown",
+                            label = norm_plot_area_label()
+                        ) +
+                        geom_text(
+                            x = 2.1,
+                            y = 0.25,
+                            size = 6,
+                            fontface = "bold",
+                            colour = "brown",
+                            label = paste0("z: ",
+                                           formatC(
+                                               round(z, 4),
+                                               format = "f",
+                                               digits = 3
+                                           ))
+                        ) +
+                        theme(
+                            plot.title = element_text(
+                                face = "bold",
+                                size = 16,
+                                hjust = 0.5
+                            ),
+                            axis.title.x = element_text(
+                                face = "bold",
+                                colour = "brown",
+                                size = 14
+                            ),
+                            axis.title.y = element_text(
+                                face = "bold",
+                                colour = "brown",
+                                size = 12
+                            ),
+                            panel.grid.minor = element_blank(),
+                            panel.grid.major = element_blank()
+                        ) +
+                        scale_x_continuous(limits = c(-3, 3),
+                                           breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
+                        scale_y_continuous(breaks = NULL)
+                })
+            }
+            else if (input$action == "reset") {
+                output$normPlot <- renderPlot({
+                    ggplot(xvalues, aes(x = xvalues$x)) +
+                        stat_function(fun = dnorm, size = .9) +
+                        labs(x = "\n Z-Score (z)",
+                             y = "",
+                             title = "Standard Normal Distribution \n") +
+                        theme(
+                            plot.title = element_text(
+                                face = "bold",
+                                size = 16,
+                                hjust = 0.5
+                            ),
+                            axis.title.x = element_text(
+                                face = "bold",
+                                colour = "brown",
+                                size = 14
+                            ),
+                            axis.title.y = element_text(
+                                face = "bold",
+                                colour = "brown",
+                                size = 12
+                            ),
+                            panel.grid.minor = element_blank(),
+                            panel.grid.major = element_blank()
+                        ) +
+                        scale_x_continuous(limits = c(-3, 3),
+                                           breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
+                        scale_y_continuous(breaks = NULL)
+                })
+            }
+
 
         #### T-DISTRIBUTION SERVER LOGIC ####
 
