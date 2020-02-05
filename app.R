@@ -89,12 +89,13 @@ norm_input_box <- box(
                 max = 1,
                 step = 0.01
             ),
-            radioButtons("action",
-                         NULL,
-                         choices = c("Submit" = "go",
-                                     "Clear" = "reset"),
-                         selected = "reset"
-                         )
+            radioButtons(
+                "action",
+                NULL,
+                choices = c("Submit" = "go",
+                            "Clear" = "reset"),
+                selected = "reset"
+            )
         )
     )
 )
@@ -217,9 +218,7 @@ chi_input_box <- box(
             radioButtons(
                 "chi_tail",
                 "Type",
-                choices = c(
-                    "Right-Tailed" = "right"
-                ),
+                choices = c("Right-Tailed" = "right"),
                 selected = "right"
             ),
             numericInput(
@@ -238,7 +237,7 @@ chi_input_box <- box(
                 "chi",
                 "Enter Chi-Squared Statistic",
                 value = 1,
-                min = 1,
+                min = 0,
                 max = NA,
                 step = 0.25
             ),
@@ -257,7 +256,7 @@ chi_input_box <- box(
             numericInput(
                 "chi_area",
                 "Area Under the Curve",
-                value = 0.8413,
+                value = 0,
                 min = 0,
                 max = 1,
                 step = 0.01
@@ -280,8 +279,8 @@ chi_row1 <- fluidRow(chi_input_box, chi_plot_box)
 
 # 4. chi Distribution tab
 chi_tab <- tabItem(tabName = "chitab",
-                 h2("The Chi-Squared Distribution"),
-                 chi_row1)
+                   h2("The Chi-Squared Distribution"),
+                   chi_row1)
 
 
 ################################ Source Tab UI ################################
@@ -462,7 +461,6 @@ ui <- dashboardPage(header, sidebar, body)
 
 
 server <- function(input, output, session) {
-
     xvalues <- data.frame(x = c(-3, 3))
     chixvalues <- data.frame(chix = c(-2, 6))
 
@@ -541,7 +539,7 @@ server <- function(input, output, session) {
         # function to compute area under normal curve from z-score
         norm_area_fun <- reactive({
             req(z)
-         #   req(nu)
+            #   req(nu)
             if (nt == "left") {
                 round(pnorm(q = z,
                             lower.tail = TRUE),
@@ -573,7 +571,7 @@ server <- function(input, output, session) {
         #### z_fun ####
         # function to compute t-statistic from area under the curve
         z_fun <- reactive({
-           # req(z)
+            # req(z)
             req(nu)
             if (nt == "left") {
                 round(qnorm(p = nu,
@@ -610,7 +608,7 @@ server <- function(input, output, session) {
         #### norm_area_value ####
         norm_area_value <- reactive({
             req(z)
-          #  req(nu)
+            #  req(nu)
             if (input$action == "reset" & na == "down") {
                 c(0)
             }
@@ -626,19 +624,19 @@ server <- function(input, output, session) {
                 }
             }
             else if (input$action == "go" & na == "down") {
-                    c(round(norm_area_fun(), 5))
-                }
+                c(round(norm_area_fun(), 5))
+            }
             else if (input$action == "go" & na == "up") {
-                    if (nu > 0 & nu < 1) {
-                        c(nu)
-                    }
-                    else if (nu == 0) {
-                        c(0.01)
-                    }
-                    else if (nu == 1) {
-                        c(0.99)
-                    }
+                if (nu > 0 & nu < 1) {
+                    c(nu)
                 }
+                else if (nu == 0) {
+                    c(0.01)
+                }
+                else if (nu == 1) {
+                    c(0.99)
+                }
+            }
         })
 
         norm_area_label <- reactive({
@@ -653,32 +651,32 @@ server <- function(input, output, session) {
         })
 
         z_value <- reactive({
-        #    req(z)
+            #    req(z)
             req(nu)
             if (input$action == "reset" & na == "up") {
-                    c(0)
-                }
+                c(0)
+            }
             else if (input$action == "reset" & na == "down") {
                 if (nt == "left" | nt == "right") {
+                    c(z)
+                }
+                else if (nt == "middle" | nt == "two") {
+                    if (z > 0) {
                         c(z)
                     }
-                    else if (nt == "middle" | nt == "two") {
-                        if (z > 0) {
-                            c(z)
-                        }
-                        else if (z < 0) {
-                            c(-z)
-                        }
+                    else if (z < 0) {
+                        c(-z)
                     }
                 }
+            }
             else if (input$action == "go" & na == "up") {
-                    if (nu > 0 & nu < 1 & z != 0) {
-                        c(round(z_fun(), 5))
-                    }
-                    else {
-                        c(1)
-                    }
+                if (nu > 0 & nu < 1 & z != 0) {
+                    c(round(z_fun(), 5))
                 }
+                else {
+                    c(1)
+                }
+            }
             else if (input$action == "go" & na == "down") {
                 if (nt == "left" | nt == "right") {
                     c(z)
@@ -796,101 +794,99 @@ server <- function(input, output, session) {
             max = nu_max()
         )
         #### NORM PLOT ####
-       # null_norm_plot <-
+        # null_norm_plot <-
 
 
-       # norm_plot <-
+        # norm_plot <-
 
 
-            if (input$action == "go") {
-                output$normPlot <- renderPlot({
-                    ggplot(xvalues, aes(x = xvalues$x)) +
-                        stat_function(fun = dnorm, size = .9) +
-                        stat_function(
-                            fun = dnorm_tail(),
-                            geom = "area",
-                            fill = "red",
-                            alpha = 0.3
-                        ) +
-                        labs(x = "\n Z-Score (z)",
-                             y = "",
-                             title = "Standard Normal Distribution \n") +
-                        geom_text(
-                            x = 2.1,
-                            y = 0.3,
-                            size = 6,
-                            fontface = "bold",
+        if (input$action == "go") {
+            output$normPlot <- renderPlot({
+                ggplot(xvalues, aes(x = xvalues$x)) +
+                    stat_function(fun = dnorm, size = .9) +
+                    stat_function(
+                        fun = dnorm_tail(),
+                        geom = "area",
+                        fill = "red",
+                        alpha = 0.3
+                    ) +
+                    labs(x = "Z-Score (z)",
+                         y = "",
+                         title = "Standard Normal Distribution") +
+                    geom_text(
+                        x = 2.1,
+                        y = 0.3,
+                        size = 6,
+                        fontface = "bold",
+                        colour = "brown",
+                        label = norm_plot_area_label()
+                    ) +
+                    geom_text(
+                        x = 2.1,
+                        y = 0.25,
+                        size = 6,
+                        fontface = "bold",
+                        colour = "brown",
+                        label = paste0("z: ",
+                                       formatC(
+                                           round(z, 4),
+                                           format = "f",
+                                           digits = 4
+                                       ))
+                    ) +
+                    theme(
+                        plot.title = element_text(
+                            # face = "bold",
+                            size = 18,
+                            hjust = 0.5
+                        ),
+                        axis.title.x = element_text(
+                            # face = "bold",
                             colour = "brown",
-                            label = norm_plot_area_label()
-                        ) +
-                        geom_text(
-                            x = 2.1,
-                            y = 0.25,
-                            size = 6,
-                            fontface = "bold",
+                            size = 16
+                        ),
+                        axis.title.y = element_text(
+                            face = "bold",
                             colour = "brown",
-                            label = paste0("z: ",
-                                           formatC(
-                                               round(z, 4),
-                                               format = "f",
-                                               digits = 3
-                                           ))
-                        ) +
-                        theme(
-                            plot.title = element_text(
-                                face = "bold",
-                                size = 16,
-                                hjust = 0.5
-                            ),
-                            axis.title.x = element_text(
-                                face = "bold",
-                                colour = "brown",
-                                size = 14
-                            ),
-                            axis.title.y = element_text(
-                                face = "bold",
-                                colour = "brown",
-                                size = 12
-                            ),
-                            panel.grid.minor = element_blank(),
-                            panel.grid.major = element_blank()
-                        ) +
-                        scale_x_continuous(limits = c(-3, 3),
-                                           breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
-                        scale_y_continuous(breaks = NULL)
-                })
-            }
-            else if (input$action == "reset") {
-                output$normPlot <- renderPlot({
-                    ggplot(xvalues, aes(x = xvalues$x)) +
-                        stat_function(fun = dnorm, size = .9) +
-                        labs(x = "\n Z-Score (z)",
-                             y = "",
-                             title = "Standard Normal Distribution \n") +
-                        theme(
-                            plot.title = element_text(
-                                face = "bold",
-                                size = 16,
-                                hjust = 0.5
-                            ),
-                            axis.title.x = element_text(
-                                face = "bold",
-                                colour = "brown",
-                                size = 14
-                            ),
-                            axis.title.y = element_text(
-                                face = "bold",
-                                colour = "brown",
-                                size = 12
-                            ),
-                            panel.grid.minor = element_blank(),
-                            panel.grid.major = element_blank()
-                        ) +
-                        scale_x_continuous(limits = c(-3, 3),
-                                           breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
-                        scale_y_continuous(breaks = NULL)
-                })
-            }
+                            size = 14
+                        ),
+                        panel.grid.minor = element_blank(),
+                        panel.grid.major = element_blank()
+                    ) +
+                    scale_x_continuous(limits = c(-3, 3),
+                                       breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
+                    scale_y_continuous(breaks = NULL)
+            })
+        }
+        else if (input$action == "reset") {
+            output$normPlot <- renderPlot({
+                ggplot(xvalues, aes(x = xvalues$x)) +
+                    stat_function(fun = dnorm, size = .9) +
+                    labs(x = "Z-Score (z)",
+                         y = "",
+                         title = bquote("Standard Normal Distribution")) +
+                    theme( plot.title = element_text(
+                            # face = "bold",
+                            size = 18,
+                            hjust = 0.5
+                        ),
+                        axis.title.x = element_text(
+                            # face = "bold",
+                            colour = "brown",
+                            size = 16
+                        ),
+                        axis.title.y = element_text(
+                            face = "bold",
+                            colour = "brown",
+                            size = 14
+                        ),
+                        panel.grid.minor = element_blank(),
+                        panel.grid.major = element_blank()) +
+                    scale_x_continuous(limits = c(-3, 3),
+                                       breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
+                    scale_y_continuous(breaks = NULL)
+            })
+        }
 
 
         #### T-DISTRIBUTION SERVER LOGIC ####
@@ -919,28 +915,28 @@ server <- function(input, output, session) {
             if (tt == "left") {
                 function(x) {
                     t_left <- dt(x, df = df)
-                    t_left[x <= -4 | x >= t] <- NA
+                    t_left[x < -4 | x > t] <- NA
                     return(t_left)
                 }
             }
             else if (tt == "right") {
                 function(x) {
                     t_right <- dt(x, df = df)
-                    t_right[x <= t | x >= 4] <- NA
+                    t_right[x < t | x > 4] <- NA
                     return(t_right)
                 }
             }
             else if (tt == "middle") {
                 function(x) {
                     t_mid <- dt(x, df = df)
-                    t_mid[x <= -t | x >= t] <- NA
+                    t_mid[x < -t | x > t] <- NA
                     return(t_mid)
                 }
             }
             else if (tt == "two") {
                 function(x) {
                     t_two <- dt(x, df = df)
-                    t_two[x >= -t & x <= t] <- NA
+                    t_two[x > -t & x < t] <- NA
                     return(t_two)
                 }
             }
@@ -1180,17 +1176,19 @@ server <- function(input, output, session) {
                 paste0("Area: ", round(t_area_fun(), 6) * 100, "%")
             }
             else {
-            if ((round(t_area_fun(), 4) * 100) < 0.01) {
-                paste0("Area: ", c(formatC(
-                    t_area_fun(),
-                    format = "e",
-                    digits = 4
-                )))
-            }
-            else {
-                paste0("Area: ",
-                       round(t_area_fun(), 4) * 100, "%")
-            }
+                if ((round(t_area_fun(), 4) * 100) < 0.01) {
+                    paste0("Area: ", c(
+                        formatC(
+                            t_area_fun(),
+                            format = "e",
+                            digits = 4
+                        )
+                    ))
+                }
+                else {
+                    paste0("Area: ",
+                           round(t_area_fun(), 4) * 100, "%")
+                }
             }
         })
 
@@ -1250,8 +1248,7 @@ server <- function(input, output, session) {
         output$tPlot <- renderPlot({
             ggplot(xvalues, aes(x = xvalues$x)) +
                 stat_function(fun = dt_density(),
-                              size = .9,
-                              na.rm = TRUE) +
+                              size = .9) +
                 stat_function(
                     fun = dt_tail(),
                     geom = "area",
@@ -1285,14 +1282,14 @@ server <- function(input, output, session) {
                 ) +
                 theme(
                     plot.title = element_text(
-                        face = "bold",
-                        size = 16,
+                        # face = "bold",
+                        size = 18,
                         hjust = 0.5
                     ),
                     axis.title.x = element_text(
-                        face = "bold",
+                        # face = "bold",
                         colour = "brown",
-                        size = 14
+                        size = 16
                     ),
                     axis.title.y = element_text(
                         face = "bold",
@@ -1328,7 +1325,7 @@ server <- function(input, output, session) {
             req(chiu)
             function(x) {
                 chisq_right <- dchisq(x, df = chidf)
-                chisq_right[x <= chi | x >= 6] <- NA
+                chisq_right[x < chi | x > 6] <- NA
                 return(chisq_right)
             }
         })
@@ -1344,7 +1341,7 @@ server <- function(input, output, session) {
                 df = chidf,
                 lower.tail = FALSE
             ),
-                digits = 5)
+            digits = 5)
         })
 
         #### chi_fun ####
@@ -1357,7 +1354,7 @@ server <- function(input, output, session) {
                 df = chidf,
                 lower.tail = FALSE
             ),
-                digits = 5)
+            digits = 5)
         })
 
         #### chi_area_value ####
@@ -1365,18 +1362,18 @@ server <- function(input, output, session) {
             req(chi)
             req(chidf)
             if (chia == "down") {
-                c(round(chi_area_fun(), 5))
+                c(round(chi_area_fun(), 2))
             }
             else if (chia == "up") {
-                if (chiu > 0 & chiu < 1) {
-                    c(chiu)
-                }
-                else if (chiu == 0) {
-                    c(0.01)
-                }
-                else if (chiu == 1) {
-                    c(0.99)
-                }
+                # if (chiu > 0 & chiu < 1) {
+                    c(round(chiu, 2))
+                # }
+                # else if (chiu == 0) {
+                #     c(0.01)
+                # }
+                # else if (chiu == 1) {
+                #     c(0.99)
+                # }
             }
         })
 
@@ -1398,15 +1395,15 @@ server <- function(input, output, session) {
             req(chi)
             if (chia == "up") {
                 if (chiu > 0 & chiu < 1) {
-                    c(round(chi_fun(), 5))
+                    c(round(chi_fun(), 2))
                 }
                 else {
                     c(1)
                 }
             }
             else if (chia == "down") {
-                    c(chi)
-                }
+                c(chi)
+            }
         })
 
         chi_label <- reactive({
@@ -1417,8 +1414,8 @@ server <- function(input, output, session) {
                 c("Chi-Squared Statistic")
             }
             else if (chia == "down") {
-                    c("Enter Chi-Squared Statistic")
-                }
+                c("Enter Chi-Squared Statistic")
+            }
         })
 
         chiu_min <- reactive({
@@ -1426,10 +1423,10 @@ server <- function(input, output, session) {
             req(chidf)
             req(chiu)
             if (chia == "down") {
-                c(round(chi_area_fun(), 5))
+                c(round(chi_area_fun(), 2))
             }
             else if (chia == "up") {
-                c(0.00001)
+                c(0.01)
             }
         })
 
@@ -1438,10 +1435,10 @@ server <- function(input, output, session) {
             req(chidf)
             req(chiu)
             if (chia == "down") {
-                c(round(chi_area_fun(), 5))
+                c(round(chi_area_fun(), 2))
             }
             else if (chia == "up") {
-                c(0.99999)
+                c(1)
             }
         })
 
@@ -1450,11 +1447,11 @@ server <- function(input, output, session) {
             req(chidf)
             req(chi)
             if (chia == "up") {
-                c(round(chi_fun(), 5))
+                c(round(chi_fun(), 2))
             }
-            else if (ta == "down") {
-                    c(NA)
-                }
+            else if (chia == "down") {
+                c(0)
+            }
         })
 
         chi_max <- reactive({
@@ -1462,7 +1459,7 @@ server <- function(input, output, session) {
             req(chiu)
             req(chidf)
             if (chia == "up") {
-                c(round(chi_fun(), 5))
+                c(round(chi_fun(), 2))
             }
             else if (chia == "down") {
                 c(NA)
@@ -1475,15 +1472,17 @@ server <- function(input, output, session) {
             req(chidf)
 
             if (chia == "up") {
-                bquote("Area: "~.(round(chi_area_fun(), 6) * 100)~"%")
+                bquote("Area: " ~ .(round(chi_area_fun(), 6) * 100) ~ "%")
             }
             else {
                 if ((round(chi_area_fun(), 4) * 100) < 0.01) {
-                    bquote("Area: "~.(c(formatC(
-                        chi_area_fun(),
-                        format = "e",
-                        digits = 4
-                    ))))
+                    bquote("Area: " ~ .(c(
+                        formatC(
+                            chi_area_fun(),
+                            format = "e",
+                            digits = 4
+                        )
+                    )))
                 }
                 else {
                     paste0("Area: ",
@@ -1505,7 +1504,7 @@ server <- function(input, output, session) {
             req(chidf)
             req(chi)
             req(chiu)
-                c(chidf)
+            c(chidf)
         })
 
         updateNumericInput(
@@ -1542,9 +1541,11 @@ server <- function(input, output, session) {
                     fill = "green",
                     alpha = 0.5
                 ) +
-                labs(x = expression(paste("Chi-Squared Statistic ", "(", chi^2, ")")),
-                    y = "",
-                    title = chi_plot_title()) +
+                labs(x = expression(paste(
+                    "Chi-Squared Statistic ", "(", chi ^ 2, ")"
+                )),
+                y = "",
+                title = chi_plot_title()) +
                 geom_text(
                     x = -1.25,
                     y = 0.15,
@@ -1559,23 +1560,25 @@ server <- function(input, output, session) {
                     size = 6,
                     fontface = "bold",
                     colour = "brown",
-                    label = bquote(bold(paste(chi^2~": "~
-                                   .(formatC(
-                                       round(chi, 4),
-                                       format = "f",
-                                       digits = 4))
-                                   )))
+                    label = bquote(bold(paste(
+                        chi ^ 2 ~ ": " ~
+                            .(formatC(
+                                round(chi, 4),
+                                format = "f",
+                                digits = 4
+                            ))
+                    )))
                 ) +
                 theme(
                     plot.title = element_text(
-                        face = "bold",
-                        size = 16,
+                        # face = "bold",
+                        size = 18,
                         hjust = 0.5
                     ),
                     axis.title.x = element_text(
-                        face = "bold",
+                        # face = "bold",
                         colour = "brown",
-                        size = 14
+                        size = 16
                     ),
                     axis.title.y = element_text(
                         face = "bold",
@@ -1586,8 +1589,8 @@ server <- function(input, output, session) {
                     panel.grid.major = element_blank()
                 ) +
                 scale_x_continuous(limits = c(-2, 6),
-                                   breaks = c(-2, -1, 0, 1, 2, 3, 4, 5, 6))
-                # scale_y_continuous(breaks = NULL)
+                                   breaks = c(-2, -1, 0, 1, 2, 3, 4, 5, 6)) +
+            scale_y_continuous(breaks = NULL)
         })
 
         #### CLT SERVER LOGIC ####
@@ -1631,10 +1634,12 @@ server <- function(input, output, session) {
         })
 
 
-        updateRadioButtons(session = session,
-                           inputId = "dist",
-                           choices = dist_choices(),
-                           selected = dist_selected())
+        updateRadioButtons(
+            session = session,
+            inputId = "dist",
+            choices = dist_choices(),
+            selected = dist_selected()
+        )
 
 
         var_choices <- reactive({
@@ -1683,10 +1688,12 @@ server <- function(input, output, session) {
             # c(input$var)
         })
 
-        updateSelectInput(session = session,
-                          inputId = "var",
-                          choices = var_choices(),
-                          selected = var_selected())
+        updateSelectInput(
+            session = session,
+            inputId = "var",
+            choices = var_choices(),
+            selected = var_selected()
+        )
 
         population <- reactive({
             # req(y)
