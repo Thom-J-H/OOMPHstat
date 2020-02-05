@@ -1,6 +1,6 @@
 #    ---------------------------------------------------------------------    #
 #                                                                             #
-#   App:    "Surf Stat" Statistics Visualizer: Normal and t-distributions     #
+#   App:    "OOMPH Stat" Statistics Visualizer: Normal and t-distributions     #
 #                                                                             #
 #   ----------------------------------------------------------------------    #
 #                                                                             #
@@ -411,7 +411,7 @@ clt_tab <- tabItem(tabName = "clt",
 
 ################################ Dashboard UI #################################
 
-header <- dashboardHeader(title = "Surf Stat",
+header <- dashboardHeader(title = "OOMPH Stat",
                           titleWidth = "300px")
 
 sidebar <- dashboardSidebar(sidebarMenu(
@@ -445,7 +445,7 @@ sidebar <- dashboardSidebar(sidebarMenu(
 # 16x16 pixel favicon (icon next to site name in web browser tab)
 favicon <- titlePanel(title = tags$head(
     tags$link(rel = "shortcut icon",
-              href = "https://raw.githubusercontent.com/posnerab/surfstathub/master/www/favicon.ico",
+              href = "https://raw.githubusercontent.com/posnerab/OOMPHstat/master/www/favicon.ico",
               type = "www/favicon.ico")
 ))
 
@@ -1866,7 +1866,7 @@ server <- function(input, output, session) {
                     target = "_blank")
 
         github <- a("Github.",
-                    href = "https://github.com/posnerab/surfstathub",
+                    href = "https://github.com/posnerab/OOMPHstat",
                     target = "_blank")
 
         output$contact <- renderUI({
