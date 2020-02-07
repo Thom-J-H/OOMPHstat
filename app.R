@@ -1,6 +1,6 @@
 #    ---------------------------------------------------------------------    #
 #                                                                             #
-#   App:    "OOMPH Stat" Statistics Visualizer: Normal and t-distributions     #
+#   App:    "OOMPH Stat" Statistics Visualizer                                #
 #                                                                             #
 #   ----------------------------------------------------------------------    #
 #                                                                             #
@@ -43,60 +43,65 @@ norm_input_box <- box(
     status = "warning",
     solidHeader = TRUE,
     collapsible = TRUE,
-    fluidRow(
+    width = 4,
+    footer = h4(
+        em("Make sure Z-Score and Area are not blank before clicking Submit"),
+        style = "text-align:center"
+    ),
+    verticalLayout(
         # Tail type radio buttons box
-        box(
-            radioButtons(
-                "norm_tail",
-                "Type",
-                choices = c(
-                    "Left-Tailed" = "left",
-                    "Right-Tailed" = "right",
-                    "Central Area" = "middle",
-                    "Two-Tailed" = "two"
-                ),
-                selected = "left"
-            )
+        # box(
+        radioButtons(
+            "norm_tail",
+            "Type",
+            choices = c(
+                "Left-Tailed" = "left",
+                "Right-Tailed" = "right",
+                "Central Area" = "middle",
+                "Two-Tailed" = "two"
+            ),
+            selected = "left"
         ),
+        # ),
         # Numeric inputs box
-        box(
-            # Z-score numeric input widget
-            numericInput(
-                "z",
-                "Enter Z-Score",
-                value = 1,
-                min = NA,
-                max = NA,
-                step = 0.25
-            ),
-            # Arrow icons radio buttons
-            radioButtons(
-                "norm_arrow",
-                NULL,
-                choiceNames = list(icon("arrow-up"),
-                                   icon("arrow-down")),
-                choiceValues = list("up",
-                                    "down"),
-                inline = TRUE,
-                selected = "down"
-            ),
-            # Area numeric inputs widget
-            numericInput(
-                "norm_area",
-                "Area Under the Curve",
-                value = 0,
-                min = 0,
-                max = 1,
-                step = 0.01
-            ),
-            radioButtons(
-                "action",
-                NULL,
-                choices = c("Submit" = "go",
-                            "Clear" = "reset"),
-                selected = "reset"
-            )
+        # box(
+        # Z-score numeric input widget
+        numericInput(
+            "z",
+            "Enter Z-Score",
+            value = 0,
+            min = NA,
+            max = NA,
+            step = 0.5
+        ),
+        # Arrow icons radio buttons
+        radioButtons(
+            "norm_arrow",
+            NULL,
+            choiceNames = list(icon("arrow-up"),
+                               icon("arrow-down")),
+            choiceValues = list("up",
+                                "down"),
+            inline = TRUE,
+            selected = "down"
+        ),
+        # Area numeric inputs widget
+        numericInput(
+            "norm_area",
+            "Area Under the Curve",
+            value = 0,
+            min = 0,
+            max = 1,
+            step = 0.01
+        ),
+        radioButtons(
+            "action",
+            NULL,
+            choices = c("Submit" = "go",
+                        "Clear" = "reset"),
+            selected = "reset"
         )
+        # )
     )
 )
 
@@ -106,7 +111,8 @@ norm_plot_box <- box(
     title = "Plot",
     status = "primary",
     solidHeader = TRUE,
-    collapsible = TRUE
+    collapsible = TRUE,
+    width = 8
 )
 
 # 3. norm first row
@@ -127,60 +133,72 @@ t_input_box <- box(
     status = "warning",
     solidHeader = TRUE,
     collapsible = TRUE,
-    fluidRow(
+    width = 4,
+    footer = h4(
+        em(
+            "Make sure t-statistic and Area are not blank before clicking Submit"
+        ),
+        style = "text-align:center"
+    ),
+    verticalLayout(
         # Tail type radio buttons box
-        box(
-            radioButtons(
-                "t_tail",
-                "Type",
-                choices = c(
-                    "Left-Tailed" = "left",
-                    "Right-Tailed" = "right",
-                    "Central Area" = "middle",
-                    "Two-Tailed" = "two"
-                ),
-                selected = "left"
+        # box(
+        radioButtons(
+            "t_tail",
+            "Type",
+            choices = c(
+                "Left-Tailed" = "left",
+                "Right-Tailed" = "right",
+                "Central Area" = "middle",
+                "Two-Tailed" = "two"
             ),
-            numericInput(
-                "df",
-                "Enter Degrees of Freedom",
-                value = 2,
-                min = 2,
-                max = NA,
-                step = 1
-            )
+            selected = "left"
+        ),
+        numericInput(
+            "df",
+            "Enter Degrees of Freedom",
+            value = 2,
+            min = 2,
+            max = NA,
+            step = 1
         ),
         # Numeric inputs left box
-        box(
-            # T-statistic numeric input widget
-            numericInput(
-                "t",
-                "Enter T-Statistic",
-                value = 1,
-                min = 2,
-                max = NA,
-                step = 0.25
-            ),
-            # Arrow icons radio buttons
-            radioButtons(
-                "t_arrow",
-                NULL,
-                choiceNames = list(icon("arrow-up"),
-                                   icon("arrow-down")),
-                choiceValues = list("up",
-                                    "down"),
-                inline = TRUE,
-                selected = "down"
-            ),
-            # Area numeric inputs widget
-            numericInput(
-                "t_area",
-                "Area Under the Curve",
-                value = 0.8413,
-                min = 0,
-                max = 1,
-                step = 0.01
-            )
+        # box(
+        # T-statistic numeric input widget
+        numericInput(
+            "t",
+            "Enter T-Statistic",
+            value = 0,
+            min = NA,
+            max = NA,
+            step = 0.5
+        ),
+        # Arrow icons radio buttons
+        radioButtons(
+            "t_arrow",
+            NULL,
+            choiceNames = list(icon("arrow-up"),
+                               icon("arrow-down")),
+            choiceValues = list("up",
+                                "down"),
+            inline = TRUE,
+            selected = "down"
+        ),
+        # Area numeric inputs widget
+        numericInput(
+            "t_area",
+            "Area Under the Curve",
+            value = 0,
+            min = 0,
+            max = 1,
+            step = 0.01
+        ),
+        radioButtons(
+            "t_action",
+            NULL,
+            choices = c("Submit" = "go",
+                        "Clear" = "reset"),
+            selected = "reset"
         )
     )
 )
@@ -191,7 +209,8 @@ t_plot_box <- box(
     title = "Plot",
     status = "primary",
     solidHeader = TRUE,
-    collapsible = TRUE
+    collapsible = TRUE,
+    width = 8
 )
 
 # 3. t first row
@@ -212,9 +231,21 @@ chi_input_box <- box(
     status = "warning",
     solidHeader = TRUE,
     collapsible = TRUE,
-    fluidRow(
+    width = 4,
+    footer = h4(em("Make sure Chi-Squared Statistic and Area are not blank before clicking Submit"), style = "text-align:center")
+
+    #     expression(paste(
+    #     "Chi-Squared Statistic ", "(", chi ^ 2, ")"
+    # ))
+    #     # h4(
+    #
+    # # ,
+    # #     style = "text-align:center"
+    # # )
+,
+    verticalLayout(
         # Tail type radio buttons box
-        box(
+        # box(
             radioButtons(
                 "chi_tail",
                 "Type",
@@ -231,7 +262,7 @@ chi_input_box <- box(
             )
         ),
         # Numeric inputs left box
-        box(
+        # box(
             # Chi-squared-statistic numeric input widget
             numericInput(
                 "chi",
@@ -261,8 +292,8 @@ chi_input_box <- box(
                 max = 1,
                 step = 0.01
             )
-        )
-    )
+        # )
+    # )
 )
 
 # 2. blue chi Plot box
@@ -271,7 +302,8 @@ chi_plot_box <- box(
     title = "Plot",
     status = "primary",
     solidHeader = TRUE,
-    collapsible = TRUE
+    collapsible = TRUE,
+    width = 8
 )
 
 # 3. chi first row
@@ -279,7 +311,7 @@ chi_row1 <- fluidRow(chi_input_box, chi_plot_box)
 
 # 4. chi Distribution tab
 chi_tab <- tabItem(tabName = "chitab",
-                   h2("The Chi-Squared Distribution"),
+                   h2("The Chi-Squared Distribution (Beta)"),
                    chi_row1)
 
 
@@ -321,6 +353,7 @@ clt_input_box <- box(
     status = "warning",
     solidHeader = TRUE,
     collapsible = TRUE,
+    width = 4,
     # verticalLayout(
     # box(
     # Pop. parameter radio buttons box
@@ -398,7 +431,8 @@ clt_plot_box <- box(
     title = "Plot",
     status = "primary",
     solidHeader = TRUE,
-    collapsible = TRUE
+    collapsible = TRUE,
+    width = 8
 )
 
 # 3. norm first row
@@ -490,6 +524,7 @@ server <- function(input, output, session) {
         tt <- input$t_tail
         ta <- input$t_arrow
         tu <- input$t_area
+        tact <- input$t_action
 
         chi <- input$chi
         chidf <- input$chidf
@@ -500,7 +535,7 @@ server <- function(input, output, session) {
 
         #### NORMAL DISTRIBUTION SERVER LOGIC ####
 
-        #### dnorm_tail ####
+            #### dnorm_tail ####
         # ggplot statistical function for shading area under Normal curve
         dnorm_tail <- reactive({
             # req(z)
@@ -538,24 +573,26 @@ server <- function(input, output, session) {
         #### norm_area_fun ####
         # function to compute area under normal curve from z-score
         norm_area_fun <- reactive({
+            req(na)
+            req(act)
             req(z)
             #   req(nu)
             if (nt == "left") {
                 round(pnorm(q = z,
                             lower.tail = TRUE),
-                      digits = 5)
+                      digits = 10)
             }
             else if (nt == "right") {
                 round(pnorm(q = z,
                             lower.tail = FALSE),
-                      digits = 5)
+                      digits = 10)
             }
             else if (nt == "middle") {
                 round(pnorm(q = z,
                             lower.tail = TRUE) -
                           pnorm(q = -z,
                                 lower.tail = TRUE),
-                      digits = 5)
+                      digits = 10)
             }
             else if (nt == "two") {
                 round(
@@ -563,7 +600,7 @@ server <- function(input, output, session) {
                           lower.tail = FALSE) +
                         pnorm(q = -z,
                               lower.tail = TRUE),
-                    digits = 5
+                    digits = 10
                 )
             }
         })
@@ -576,12 +613,12 @@ server <- function(input, output, session) {
             if (nt == "left") {
                 round(qnorm(p = nu,
                             lower.tail = TRUE),
-                      digits = 5)
+                      digits = 10)
             }
             else if (nt == "right") {
                 round(qnorm(p = nu,
                             lower.tail = FALSE),
-                      digits = 5)
+                      digits = 10)
             }
             else if (nt == "middle") {
                 round(qnorm(
@@ -592,7 +629,7 @@ server <- function(input, output, session) {
                     sd = 1,
                     lower.tail = TRUE
                 ),
-                digits = 5)
+                digits = 10)
             }
             else if (nt == "two") {
                 round(qnorm(
@@ -601,7 +638,7 @@ server <- function(input, output, session) {
                     sd = 1,
                     lower.tail = FALSE
                 ),
-                digits = 5)
+                digits = 10)
             }
         })
 
@@ -609,10 +646,10 @@ server <- function(input, output, session) {
         norm_area_value <- reactive({
             req(z)
             #  req(nu)
-            if (input$action == "reset" & na == "down") {
+            if (act == "reset" & na == "down") {
                 c(0)
             }
-            else if (input$action == "reset" & na == "up") {
+            else if (act == "reset" & na == "up") {
                 if (nu > 0 & nu < 1) {
                     c(nu)
                 }
@@ -623,10 +660,10 @@ server <- function(input, output, session) {
                     c(0.99)
                 }
             }
-            else if (input$action == "go" & na == "down") {
-                c(round(norm_area_fun(), 5))
+            else if (act == "go" & na == "down") {
+                c(round(norm_area_fun(), 10))
             }
-            else if (input$action == "go" & na == "up") {
+            else if (act == "go" & na == "up") {
                 if (nu > 0 & nu < 1) {
                     c(nu)
                 }
@@ -638,7 +675,7 @@ server <- function(input, output, session) {
                 }
             }
         })
-
+        #### norm_area_label ####
         norm_area_label <- reactive({
             req(z)
             req(nu)
@@ -649,49 +686,51 @@ server <- function(input, output, session) {
                 c("Enter Area Under the Curve (0 to 1)")
             }
         })
-
+        #### z_value ####
         z_value <- reactive({
             #    req(z)
             req(nu)
-            if (input$action == "reset" & na == "up") {
-                c(0)
-            }
-            else if (input$action == "reset" & na == "down") {
-                if (nt == "left" | nt == "right") {
-                    c(z)
-                }
-                else if (nt == "middle" | nt == "two") {
-                    if (z > 0) {
-                        c(z)
-                    }
-                    else if (z < 0) {
-                        c(-z)
-                    }
-                }
-            }
-            else if (input$action == "go" & na == "up") {
-                if (nu > 0 & nu < 1 & z != 0) {
-                    c(round(z_fun(), 5))
+            if (na == "up") {
+                if (act == "reset") {
+                    c(0)
                 }
                 else {
-                    c(1)
+                    # if action button is go
+                    c(round(z_fun(), 10))
                 }
             }
-            else if (input$action == "go" & na == "down") {
-                if (nt == "left" | nt == "right") {
-                    c(z)
-                }
-                else if (nt == "middle" | nt == "two") {
-                    if (z > 0) {
+            else {
+                # if arrow is down
+                if (act == "reset") {
+                    if (nt == "left" | nt == "right") {
                         c(z)
                     }
-                    else if (z < 0) {
-                        c(-z)
+                    else if (nt == "middle" | nt == "two") {
+                        if (z > 0) {
+                            c(z)
+                        }
+                        else if (z < 0) {
+                            c(-z)
+                        }
+                    }
+                }
+                else {
+                    # if action button is go
+                    if (nt == "left" | nt == "right") {
+                        c(z)
+                    }
+                    else if (nt == "middle" | nt == "two") {
+                        if (z > 0) {
+                            c(z)
+                        }
+                        else if (z < 0) {
+                            c(-z)
+                        }
                     }
                 }
             }
         })
-
+        #### z_label ####
         z_label <- reactive({
             req(z)
             req(nu)
@@ -707,35 +746,37 @@ server <- function(input, output, session) {
                 }
             }
         })
-
+        #### nu_min ####
         nu_min <- reactive({
             req(z)
             if (na == "down") {
-                c(round(norm_area_fun(), 5))
+                c(round(norm_area_fun(), 10))
             }
             else if (na == "up") {
-                c(0.00001)
+                c(0)
             }
         })
-
+        #### nu_max ####
         nu_max <- reactive({
             req(z)
             if (na == "down") {
-                c(round(norm_area_fun(), 5))
+                c(round(norm_area_fun(), 10))
             }
             else if (na == "up") {
-                c(0.99999)
+                c(1)
             }
         })
-
+        #### z_min ####
         z_min <- reactive({
+            req(na)
+            req(act)
             req(nu)
             if (na == "up") {
-                if (nt == "middle" | nt == "two") {
-                    c(0.00001)
+                if (act == "reset") {
+                    c(0)
                 }
                 else {
-                    c(round(z_fun(), 5))
+                    c(round(z_fun(), 10))
                 }
             }
             else if (na == "down") {
@@ -747,31 +788,39 @@ server <- function(input, output, session) {
                 }
             }
         })
-
+        #### z_max ####
         z_max <- reactive({
+            req(na)
+            req(act)
             req(nu)
             if (na == "up") {
-                c(round(z_fun(), 5))
+                if (act == "go") {
+                    c(round(z_fun(), 10))
+                }
+                else {
+                    c(0)
+                }
             }
             else if (na == "down") {
                 c(NA)
             }
         })
-
+        #### norm_plot_area_label ####
         norm_plot_area_label <- reactive({
             req(z)
             req(nu)
-            if ((round(norm_area_fun(), 4) * 100) < 0.01) {
+            req(act)
+            if ((round(norm_area_fun(), 6) * 100) < 0.01) {
                 paste0("Area: ", c(
                     formatC(
                         norm_area_fun(),
                         format = "e",
-                        digits = 2
+                        digits = 5
                     )
                 ))
             }
             else {
-                paste0("Area: ", round(norm_area_fun(), 4) * 100, "%")
+                paste0("Area: ", round(norm_area_fun(), 5) * 100, "%")
             }
         })
 
@@ -793,14 +842,9 @@ server <- function(input, output, session) {
             min = nu_min(),
             max = nu_max()
         )
+
         #### NORM PLOT ####
-        # null_norm_plot <-
-
-
-        # norm_plot <-
-
-
-        if (input$action == "go") {
+        if (act == "go") {
             output$normPlot <- renderPlot({
                 ggplot(xvalues, aes(x = xvalues$x)) +
                     stat_function(fun = dnorm, size = .9) +
@@ -829,22 +873,18 @@ server <- function(input, output, session) {
                         colour = "brown",
                         label = paste0("z: ",
                                        formatC(
-                                           round(z, 4),
+                                           round(z, 5),
                                            format = "f",
-                                           digits = 4
+                                           digits = 5
                                        ))
                     ) +
                     theme(
-                        plot.title = element_text(
-                            # face = "bold",
+                        plot.title = element_text(# face = "bold",
                             size = 18,
-                            hjust = 0.5
-                        ),
-                        axis.title.x = element_text(
-                            # face = "bold",
+                            hjust = 0.5),
+                        axis.title.x = element_text(# face = "bold",
                             colour = "brown",
-                            size = 16
-                        ),
+                            size = 16),
                         axis.title.y = element_text(
                             face = "bold",
                             colour = "brown",
@@ -858,30 +898,30 @@ server <- function(input, output, session) {
                     scale_y_continuous(breaks = NULL)
             })
         }
-        else if (input$action == "reset") {
+        else if (act == "reset") {
             output$normPlot <- renderPlot({
                 ggplot(xvalues, aes(x = xvalues$x)) +
                     stat_function(fun = dnorm, size = .9) +
-                    labs(x = "Z-Score (z)",
-                         y = "",
-                         title = bquote("Standard Normal Distribution")) +
-                    theme( plot.title = element_text(
-                            # face = "bold",
+                    labs(
+                        x = "Z-Score (z)",
+                        y = "",
+                        title = bquote("Standard Normal Distribution")
+                    ) +
+                    theme(
+                        plot.title = element_text(# face = "bold",
                             size = 18,
-                            hjust = 0.5
-                        ),
-                        axis.title.x = element_text(
-                            # face = "bold",
+                            hjust = 0.5),
+                        axis.title.x = element_text(# face = "bold",
                             colour = "brown",
-                            size = 16
-                        ),
+                            size = 16),
                         axis.title.y = element_text(
                             face = "bold",
                             colour = "brown",
                             size = 14
                         ),
                         panel.grid.minor = element_blank(),
-                        panel.grid.major = element_blank()) +
+                        panel.grid.major = element_blank()
+                    ) +
                     scale_x_continuous(limits = c(-3, 3),
                                        breaks = c(-3, -2, -1, 0, 1, 2, 3)) +
                     scale_y_continuous(breaks = NULL)
@@ -890,7 +930,7 @@ server <- function(input, output, session) {
 
 
         #### T-DISTRIBUTION SERVER LOGIC ####
-
+        #### t_header ####
         output$t_header <- renderUI({
             h2("The ", em("t"), "-distribution")
         })
@@ -908,6 +948,7 @@ server <- function(input, output, session) {
                 return(t_den)
             }
         })
+        #### dt_tail ####
         dt_tail <- reactive({
             req(t)
             req(df)
@@ -954,7 +995,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = TRUE
                 ),
-                digits = 5)
+                digits = 10)
             }
             else if (tt == "right") {
                 round(pt(
@@ -962,7 +1003,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = FALSE
                 ),
-                digits = 5)
+                digits = 10)
             }
             else if (tt == "middle") {
                 round(
@@ -976,7 +1017,7 @@ server <- function(input, output, session) {
                             df = df,
                             lower.tail = TRUE
                         ),
-                    digits = 5
+                    digits = 10
                 )
             }
             else if (tt == "two") {
@@ -991,7 +1032,7 @@ server <- function(input, output, session) {
                             df = df,
                             lower.tail = TRUE
                         ),
-                    digits = 5
+                    digits = 10
                 )
             }
         })
@@ -1008,7 +1049,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = TRUE
                 ),
-                digits = 5)
+                digits = 10)
             }
             else if (tt == "right") {
                 round(qt(
@@ -1016,7 +1057,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = FALSE
                 ),
-                digits = 5)
+                digits = 10)
             }
             else if (tt == "middle") {
                 round(qt(
@@ -1026,7 +1067,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = TRUE
                 ),
-                digits = 5)
+                digits = 10)
             }
             else if (tt == "two") {
                 round(qt(
@@ -1034,7 +1075,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = FALSE
                 ),
-                digits = 5)
+                digits = 10)
             }
         })
 
@@ -1043,21 +1084,26 @@ server <- function(input, output, session) {
             req(t)
             req(df)
             if (ta == "down") {
-                c(round(t_area_fun(), 5))
+                if (tact == "reset") {
+                    c(0)
+                }
+                else {
+                    c(round(t_area_fun(), 10))
+                }
             }
             else if (ta == "up") {
-                if (tu > 0 & tu < 1) {
-                    c(tu)
-                }
-                else if (tu == 0) {
-                    c(0.01)
-                }
-                else if (tu == 1) {
-                    c(0.99)
-                }
+                    if (tu > 0 & tu < 1) {
+                        c(tu)
+                    }
+                    else if (tu == 0) {
+                        c(0.01)
+                    }
+                    else if (tu == 1) {
+                        c(0.99)
+                    }
             }
         })
-
+        #### t_area_label ####
         t_area_label <- reactive({
             req(t)
             req(tu)
@@ -1070,33 +1116,41 @@ server <- function(input, output, session) {
             }
         })
 
+        # t_value ####
         t_value <- reactive({
             req(tu)
             req(df)
-            req(t)
             if (ta == "up") {
-                if (tu > 0 & tu < 1) {
-                    c(round(t_fun(), 5))
+                if (tact == "reset") {
+                    c(0)
                 }
-                else {
-                    c(1)
+                else { # if action button is go
+                    c(round(t_fun(), 10))
                 }
+                # if (tu > 0 & tu < 1) {
+                #     c(round(t_fun(), 5))
+                # }
+                # else {
+                #     c(1)
+                # }
             }
-            else if (ta == "down") {
-                if (tt == "left" | tt == "right") {
-                    c(t)
-                }
-                else if (tt == "middle" | tt == "two") {
-                    if (t >= 0) {
+            else { # if arrow is down
+                if (tact == "reset") {
+                    if (tt == "left" | tt == "right") {
                         c(t)
                     }
-                    else if (t < 0) {
-                        c(-t)
+                    else if (tt == "middle" | tt == "two") {
+                        if (t >= 0) {
+                            c(t)
+                        }
+                        else if (t < 0) {
+                            c(-t)
+                        }
                     }
                 }
             }
         })
-
+        #### t_label ####
         t_label <- reactive({
             req(t)
             req(df)
@@ -1113,39 +1167,49 @@ server <- function(input, output, session) {
                 }
             }
         })
-
+        #### tu_min ####
         tu_min <- reactive({
             req(t)
             req(df)
             req(tu)
             if (ta == "down") {
-                c(round(t_area_fun(), 5))
+                c(round(t_area_fun(), 10))
             }
             else if (ta == "up") {
-                c(0.00001)
+                c(0)
             }
         })
-
+        #### tu_max ####
         tu_max <- reactive({
             req(t)
             req(df)
-            req(tu)
+            req(tact)
             if (ta == "down") {
-                c(round(t_area_fun(), 5))
+                if (tact == "reset") {
+                    c(0)
+                }
+                else {
+                    c(round(t_area_fun(), 10))
+                }
             }
             else if (ta == "up") {
-                c(0.99999)
+                c(1)
             }
         })
-
+        #### t_min ####
         t_min <- reactive({
+            req(tact)
             req(tu)
             req(df)
-            req(t)
             if (ta == "up") {
-                c(round(t_fun(), 5))
+                if (act == "reset") {
+                    c(0)
+                }
+                else { # if action is go
+                    c(round(t_fun(), 10))
+                }
             }
-            else if (ta == "down") {
+            else {
                 if (tt == "left" | tt == "right") {
                     c(NA)
                 }
@@ -1154,19 +1218,24 @@ server <- function(input, output, session) {
                 }
             }
         })
-
+        #### t_max ####
         t_max <- reactive({
-            req(t)
+            req(tact)
             req(tu)
             req(df)
             if (ta == "up") {
-                c(round(t_fun(), 5))
+                if (tact == "reset") {
+                    c(0)
+                }
+                else {
+                    c(round(t_fun(), 10))
+                }
             }
-            else if (ta == "down") {
+            else {
                 c(NA)
             }
         })
-
+        #### t_plot_area_label ####
         t_plot_area_label <- reactive({
             req(t)
             req(tu)
@@ -1176,22 +1245,22 @@ server <- function(input, output, session) {
                 paste0("Area: ", round(t_area_fun(), 6) * 100, "%")
             }
             else {
-                if ((round(t_area_fun(), 4) * 100) < 0.01) {
+                if ((round(t_area_fun(), 6) * 100) < 0.01) {
                     paste0("Area: ", c(
                         formatC(
                             t_area_fun(),
                             format = "e",
-                            digits = 4
+                            digits = 5
                         )
                     ))
                 }
                 else {
                     paste0("Area: ",
-                           round(t_area_fun(), 4) * 100, "%")
+                           round(t_area_fun(), 5) * 100, "%")
                 }
             }
         })
-
+        #### t_plot_title ####
         t_plot_title <- reactive({
             req(df)
             req(t)
@@ -1209,7 +1278,7 @@ server <- function(input, output, session) {
                            "degrees of freedom")
             }
         })
-
+        #### df_value ####
         df_value <- reactive({
             req(df)
             req(t)
@@ -1245,67 +1314,102 @@ server <- function(input, output, session) {
                            value = df_value())
 
         #### T PLOT ####
-        output$tPlot <- renderPlot({
-            ggplot(xvalues, aes(x = xvalues$x)) +
-                stat_function(fun = dt_density(),
-                              size = .9) +
-                stat_function(
-                    fun = dt_tail(),
-                    geom = "area",
-                    fill = "orange",
-                    alpha = 0.5
-                ) +
-                xlab(expression(italic("t") ~ "-statistic (t)")) +
-                labs(# x = " \n t-statistic (t)",
-                    y = "",
-                    title = t_plot_title()) +
-                geom_text(
-                    x = 2.1,
-                    y = 0.3,
-                    size = 6,
-                    fontface = "bold",
-                    colour = "brown",
-                    label = t_plot_area_label()
-                ) +
-                geom_text(
-                    x = 2.1,
-                    y = 0.25,
-                    size = 6,
-                    fontface = "bold",
-                    colour = "brown",
-                    label = paste0("t: ",
-                                   formatC(
-                                       round(t, 4),
-                                       format = "f",
-                                       digits = 4
-                                   ))
-                ) +
-                theme(
-                    plot.title = element_text(
-                        # face = "bold",
-                        size = 18,
-                        hjust = 0.5
-                    ),
-                    axis.title.x = element_text(
-                        # face = "bold",
+        if (tact == "go") {
+            output$tPlot <- renderPlot({
+                ggplot(xvalues, aes(x = xvalues$x)) +
+                    stat_function(fun = dt_density(),
+                                  size = .9) +
+                    stat_function(
+                        fun = dt_tail(),
+                        geom = "area",
+                        fill = "orange",
+                        alpha = 0.5
+                    ) +
+                    xlab(expression(italic("t") ~ "-statistic (t)")) +
+                    labs(# x = " \n t-statistic (t)",
+                        y = "",
+                        title = t_plot_title()) +
+                    geom_text(
+                        x = 2.1,
+                        y = 0.3,
+                        size = 6,
+                        fontface = "bold",
                         colour = "brown",
-                        size = 16
-                    ),
-                    axis.title.y = element_text(
-                        face = "bold",
+                        label = t_plot_area_label()
+                    ) +
+                    geom_text(
+                        x = 2.1,
+                        y = 0.25,
+                        size = 6,
+                        fontface = "bold",
                         colour = "brown",
-                        size = 12
-                    ),
-                    panel.grid.minor = element_blank(),
-                    panel.grid.major = element_blank()
-                ) +
-                scale_x_continuous(limits = c(-4, 4),
-                                   breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4)) +
-                scale_y_continuous(breaks = NULL)
-        })
+                        label = paste0("t: ",
+                                       formatC(
+                                           round(t, 4),
+                                           format = "f",
+                                           digits = 4
+                                       ))
+                    ) +
+                    theme(
+                        plot.title = element_text(# face = "bold",
+                            size = 18,
+                            hjust = 0.5),
+                        axis.title.x = element_text(# face = "bold",
+                            colour = "brown",
+                            size = 16),
+                        axis.title.y = element_text(
+                            face = "bold",
+                            colour = "brown",
+                            size = 12
+                        ),
+                        panel.grid.minor = element_blank(),
+                        panel.grid.major = element_blank()
+                    ) +
+                    scale_x_continuous(limits = c(-4, 4),
+                                       breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4)) +
+                    scale_y_continuous(breaks = NULL)
+            })
+        }
+        else if (tact == "reset") {
+            output$tPlot <- renderPlot({
+                ggplot(xvalues, aes(x = xvalues$x)) +
+                    stat_function(fun = dt_density(),
+                                  size = .9) +
+                    xlab(expression(italic("t") ~ "-statistic (t)")) +
+                    labs(# x = " \n t-statistic (t)",
+                        y = "",
+                        title = t_plot_title()) +
+                    theme(
+                        plot.title = element_text(# face = "bold",
+                            size = 18,
+                            hjust = 0.5),
+                        axis.title.x = element_text(# face = "bold",
+                            colour = "brown",
+                            size = 16),
+                        axis.title.y = element_text(
+                            face = "bold",
+                            colour = "brown",
+                            size = 12
+                        ),
+                        panel.grid.minor = element_blank(),
+                        panel.grid.major = element_blank()
+                    ) +
+                    scale_x_continuous(limits = c(-4, 4),
+                                       breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4)) +
+                    scale_y_continuous(breaks = NULL)
+            })
+        }
 
 
         #### CHI SERVER LOGIC ####
+        #### chi_footer ####
+        # output$chi_footer <- renderUI({
+        #     expression(paste(
+        #         "Chi-Squared Statistic ", "(", chi ^ 2, ")"
+        #     ))
+        #
+        #     # h4(em("Make sure "), "χ", expression("^ 2"), em(" Statistic and Area are not blank before clicking Submit"))
+        # })
 
         #### dchisq_density ####
         # ggplot statistical function for shading area under Chi curve
@@ -1325,7 +1429,8 @@ server <- function(input, output, session) {
             req(chiu)
             function(x) {
                 chisq_right <- dchisq(x, df = chidf)
-                chisq_right[x < chi | x > 6] <- NA
+                chisq_right[x < chi] <- NA
+                #| chi > 6] <- NA
                 return(chisq_right)
             }
         })
@@ -1335,7 +1440,6 @@ server <- function(input, output, session) {
         chi_area_fun <- reactive({
             req(chidf)
             req(chi)
-            req(chiu)
             round(pchisq(
                 q = chi,
                 df = chidf,
@@ -1366,7 +1470,7 @@ server <- function(input, output, session) {
             }
             else if (chia == "up") {
                 # if (chiu > 0 & chiu < 1) {
-                    c(round(chiu, 2))
+                c(round(chiu, 2))
                 # }
                 # else if (chiu == 0) {
                 #     c(0.01)
@@ -1426,7 +1530,7 @@ server <- function(input, output, session) {
                 c(round(chi_area_fun(), 2))
             }
             else if (chia == "up") {
-                c(0.01)
+                c(0)
             }
         })
 
@@ -1500,12 +1604,9 @@ server <- function(input, output, session) {
                        "Degrees of Freedom")
         })
 
-        chidf_value <- reactive({
-            req(chidf)
-            req(chi)
-            req(chiu)
-            c(chidf)
-        })
+        #chidf_value <- reactive({
+        #    c(chidf)
+        #})
 
         updateNumericInput(
             session,
@@ -1525,16 +1626,15 @@ server <- function(input, output, session) {
             max = chiu_max()
         )
 
-        updateNumericInput(session,
-                           "chidf",
-                           value = chidf_value())
+       # updateNumericInput(session,
+       #                    "chidf",
+       #                    value = chidf_value())
 
         #### CHI PLOT ####
         output$chiPlot <- renderPlot({
             ggplot(chixvalues, aes(x = chixvalues$chix)) +
                 stat_function(fun = dchisq_density(),
-                              size = .9,
-                              na.rm = TRUE) +
+                              size = .9) +
                 stat_function(
                     fun = dchisq_tail(),
                     geom = "area",
@@ -1570,16 +1670,12 @@ server <- function(input, output, session) {
                     )))
                 ) +
                 theme(
-                    plot.title = element_text(
-                        # face = "bold",
+                    plot.title = element_text(# face = "bold",
                         size = 18,
-                        hjust = 0.5
-                    ),
-                    axis.title.x = element_text(
-                        # face = "bold",
+                        hjust = 0.5),
+                    axis.title.x = element_text(# face = "bold",
                         colour = "brown",
-                        size = 16
-                    ),
+                        size = 16),
                     axis.title.y = element_text(
                         face = "bold",
                         colour = "brown",
@@ -1590,7 +1686,7 @@ server <- function(input, output, session) {
                 ) +
                 scale_x_continuous(limits = c(-2, 6),
                                    breaks = c(-2, -1, 0, 1, 2, 3, 4, 5, 6)) +
-            scale_y_continuous(breaks = NULL)
+                scale_y_continuous(breaks = NULL)
         })
 
         #### CLT SERVER LOGIC ####
@@ -1884,7 +1980,7 @@ server <- function(input, output, session) {
             )
         })
 
-    }) # closes out top level observe function
+    }) #### closes out top level observe function ####
 }
 # Run the application
 shinyApp(ui = ui, server = server)
