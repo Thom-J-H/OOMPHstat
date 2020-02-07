@@ -231,7 +231,7 @@ chi_input_box <- box(
     status = "warning",
     solidHeader = TRUE,
     collapsible = TRUE,
-    width = 4,
+    width = 3,
     footer = h4(em("Make sure Chi-Squared Statistic and Area are not blank before clicking Submit"), style = "text-align:center")
 
     #     expression(paste(
@@ -303,11 +303,21 @@ chi_plot_box <- box(
     status = "primary",
     solidHeader = TRUE,
     collapsible = TRUE,
-    width = 8
+    width = 6
+)
+
+chi_values_box <- box(
+    plotOutput("chi_footer"),
+    title = "Values",
+    status = "warning",
+    solidHeader = TRUE,
+    collapsible = TRUE,
+    width = 3
+
 )
 
 # 3. chi first row
-chi_row1 <- fluidRow(chi_input_box, chi_plot_box)
+chi_row1 <- fluidRow(chi_input_box, chi_plot_box, chi_values_box)
 
 # 4. chi Distribution tab
 chi_tab <- tabItem(tabName = "chitab",
@@ -497,6 +507,7 @@ ui <- dashboardPage(header, sidebar, body)
 server <- function(input, output, session) {
     xvalues <- data.frame(x = c(-3, 3))
     chixvalues <- data.frame(chix = c(-2, 6))
+    val_box <- data.frame(x = c(0, 4))
 
 
     observe({
@@ -1402,14 +1413,7 @@ server <- function(input, output, session) {
 
 
         #### CHI SERVER LOGIC ####
-        #### chi_footer ####
-        # output$chi_footer <- renderUI({
-        #     expression(paste(
-        #         "Chi-Squared Statistic ", "(", chi ^ 2, ")"
-        #     ))
-        #
-        #     # h4(em("Make sure "), "χ", expression("^ 2"), em(" Statistic and Area are not blank before clicking Submit"))
-        # })
+
 
         #### dchisq_density ####
         # ggplot statistical function for shading area under Chi curve
@@ -1574,7 +1578,6 @@ server <- function(input, output, session) {
             req(chi)
             req(chiu)
             req(chidf)
-
             if (chia == "up") {
                 bquote("Area: " ~ .(round(chi_area_fun(), 6) * 100) ~ "%")
             }
@@ -1646,29 +1649,6 @@ server <- function(input, output, session) {
                 )),
                 y = "",
                 title = chi_plot_title()) +
-                geom_text(
-                    x = -1.25,
-                    y = 0.15,
-                    size = 6,
-                    fontface = "bold",
-                    colour = "brown",
-                    label = chi_plot_area_label()
-                ) +
-                geom_text(
-                    x = -1.25,
-                    y = 0.1,
-                    size = 6,
-                    fontface = "bold",
-                    colour = "brown",
-                    label = bquote(bold(paste(
-                        chi ^ 2 ~ ": " ~
-                            .(formatC(
-                                round(chi, 4),
-                                format = "f",
-                                digits = 4
-                            ))
-                    )))
-                ) +
                 theme(
                     plot.title = element_text(# face = "bold",
                         size = 18,
@@ -1687,6 +1667,47 @@ server <- function(input, output, session) {
                 scale_x_continuous(limits = c(-2, 6),
                                    breaks = c(-2, -1, 0, 1, 2, 3, 4, 5, 6)) +
                 scale_y_continuous(breaks = NULL)
+        })
+
+        #### chi_footer ####
+        output$chi_footer <- renderPlot({
+            req(chi)
+            req(chidf)
+            req(chiu)
+            ggplot(val_box, aes(x = val_box$x)) +
+                stat_function(fun = dnorm,
+                              size = .9,
+                              ) +
+                geom_text(
+                    x = 3,
+                    y = 0.2,
+                    size = 6,
+                    fontface = "bold",
+                    colour = "brown",
+                    label = chi_plot_area_label()
+                ) +
+                geom_text(
+                    x = 3,
+                    y = 0.15,
+                    size = 6,
+                    fontface = "bold",
+                    colour = "brown",
+                    label = bquote(bold(paste(
+                        chi ^ 2 ~ ": " ~
+                            .(formatC(
+                                round(chi, 4),
+                                format = "f",
+                                digits = 4
+                            ))
+                    )))
+                ) +
+                theme(
+                    panel.grid.minor = element_blank(),
+                    panel.grid.major = element_blank()
+                ) +
+                scale_x_continuous(breaks = NULL) +
+                scale_y_continuous(breaks = NULL) +
+                labs(x = NULL, y = NULL)
         })
 
         #### CLT SERVER LOGIC ####
