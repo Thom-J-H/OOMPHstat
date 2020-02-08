@@ -1,4 +1,4 @@
 # OOMPH Stat
 Stats shiny apps
 
-Stable URL: https://xandersph.shinyapps.io/surfstathub/
+Stable URL: https://xandersph.shinyapps.io/OOMPHstat/
