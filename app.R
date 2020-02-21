@@ -2058,7 +2058,7 @@ server <- function(input, output, session) {
 
         output$contact <- renderUI({
             tagList(
-                p("© 2019 Xander Posner, ", email),
+                p("© 2020 Xander Posner, ", email),
                 p("MPH '20 | Epidemiology & Biostatistics"),
                 p(school)
             )
