@@ -1659,8 +1659,8 @@ server <- function(input, output, session) {
                         panel.grid.minor = element_blank(),
                         panel.grid.major = element_blank()
                     ) +
-                    scale_x_continuous(limits = c(-2, 6),
-                                       breaks = c(-2, -1, 0, 1, 2, 3, 4, 5, 6)) +
+                    scale_x_continuous(limits = c(0, 6),
+                                       breaks = c(0, 1, 2, 3, 4, 5, 6)) +
                     scale_y_continuous(breaks = NULL)
             })
         }
@@ -1689,8 +1689,8 @@ server <- function(input, output, session) {
                         panel.grid.minor = element_blank(),
                         panel.grid.major = element_blank()
                     ) +
-                    scale_x_continuous(limits = c(-2, 6),
-                                       breaks = c(-2, -1, 0, 1, 2, 3, 4, 5, 6)) +
+                    scale_x_continuous(limits = c(0, 6),
+                                       breaks = c(0, 1, 2, 3, 4, 5, 6)) +
                     scale_y_continuous(breaks = NULL)
             })
         }
