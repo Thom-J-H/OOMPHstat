@@ -387,9 +387,8 @@ clt_input_box <- box(
             "Age" = "age",
             "Height" = "height",
             "SAT Scores" = "SAT",
-            "Annual Income" = "income",
             "MediCal Costs: Hip & Knee Replacements" = "hip",
-            "Annual Income: LA County" = "LA",
+            "Annual Income" = "LA",
             "Current Smoker" = "smoke"
         ),
         selected = "age"
@@ -852,7 +851,7 @@ server <- function(input, output, session) {
         #### NORM PLOT ####
         if (act == "go") {
             output$normPlot <- renderPlot({
-                ggplot(xvalues, aes(x = xvalues$x)) +
+                ggplot(xvalues, aes(x = x)) +
                     stat_function(fun = dnorm, size = .9) +
                     stat_function(
                         fun = dnorm_tail(),
@@ -906,7 +905,7 @@ server <- function(input, output, session) {
         }
         else if (act == "reset") {
             output$normPlot <- renderPlot({
-                ggplot(xvalues, aes(x = xvalues$x)) +
+                ggplot(xvalues, aes(x = x)) +
                     stat_function(fun = dnorm, size = .9) +
                     labs(
                         x = "Z-Score (z)",
@@ -1322,7 +1321,7 @@ server <- function(input, output, session) {
         #### T PLOT ####
         if (tact == "go") {
             output$tPlot <- renderPlot({
-                ggplot(xvalues, aes(x = xvalues$x)) +
+                ggplot(xvalues, aes(x = x)) +
                     stat_function(fun = dt_density(),
                                   size = .9) +
                     stat_function(
@@ -1378,7 +1377,7 @@ server <- function(input, output, session) {
         }
         else if (tact == "reset") {
             output$tPlot <- renderPlot({
-                ggplot(xvalues, aes(x = xvalues$x)) +
+                ggplot(xvalues, aes(x = x)) +
                     stat_function(fun = dt_density(),
                                   size = .9) +
                     xlab(expression(italic("t") ~ "-statistic (t)")) +
@@ -1630,7 +1629,7 @@ server <- function(input, output, session) {
         #### CHI PLOT ####
         if (cact == "go") {
             output$chiPlot <- renderPlot({
-                ggplot(chixvalues, aes(x = chixvalues$chix)) +
+                ggplot(chixvalues, aes(x = chix)) +
                     stat_function(fun = dchisq_density(),
                                   size = .9) +
                     stat_function(
@@ -1666,7 +1665,7 @@ server <- function(input, output, session) {
         }
         else {
             output$chiPlot <- renderPlot({
-                ggplot(chixvalues, aes(x = chixvalues$chix)) +
+                ggplot(chixvalues, aes(x = chix)) +
                     stat_function(fun = dchisq_density(),
                                   size = .9) +
                     labs(x = expression(paste(
@@ -1701,7 +1700,7 @@ server <- function(input, output, session) {
                 req(chi)
                 req(chidf)
                 req(chiu)
-                ggplot(val_box, aes(x = val_box$x)) +
+                ggplot(val_box, aes(x = x)) +
                     stat_function(fun = dnorm,
                                   size = .9,
                     ) +
@@ -1742,7 +1741,7 @@ server <- function(input, output, session) {
                 req(chi)
                 req(chidf)
                 req(chiu)
-                ggplot(val_box, aes(x = val_box$x)) +
+                ggplot(val_box, aes(x = x)) +
                     stat_function(fun = dnorm,
                                   size = .9,
                     ) +
@@ -1845,12 +1844,11 @@ server <- function(input, output, session) {
             }
             else if (x == "sskew") {
                 c(
-                    "Annual Income" = "income",
                     "MediCal Costs: Hip & Knee Replacements" = "hip"
                 )
             }
             else {
-                c("Annual Income: LA County" = "LA")
+                c("Annual Income" = "LA")
             }
         })
 
@@ -1867,10 +1865,10 @@ server <- function(input, output, session) {
                 c("Height" = "height")
             }
             else if (x == "sskew") {
-                c("Annual Income" = "income")
+                c("MediCal Costs: Hip & Knee Replacements" = "hip")
             }
             else {
-                c("Annual Income: LA County" = "LA")
+                c("Annual Income" = "LA")
             }
             # c(input$var)
         })
