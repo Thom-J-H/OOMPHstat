@@ -70,8 +70,8 @@ norm_input_box <- box(
             "z",
             "Enter Z-Score",
             value = 0,
-            min = NA,
-            max = NA,
+            min = -Inf,
+            max = Inf,
             step = 0.5
         ),
         # Arrow icons radio buttons
@@ -159,7 +159,7 @@ t_input_box <- box(
             "Enter Degrees of Freedom",
             value = 2,
             min = 2,
-            max = NA,
+            max = Inf,
             step = 1
         ),
         # Numeric inputs left box
@@ -169,8 +169,8 @@ t_input_box <- box(
             "t",
             "Enter T-Statistic",
             value = 0,
-            min = NA,
-            max = NA,
+            min = -Inf,
+            max = Inf,
             step = 0.5
         ),
         # Arrow icons radio buttons
@@ -246,7 +246,7 @@ chi_input_box <- box(
                 "Enter Degrees of Freedom",
                 value = 2,
                 min = 2,
-                max = NA,
+                max = Inf,
                 step = 1
             ),
         # Numeric inputs left box
@@ -257,7 +257,7 @@ chi_input_box <- box(
                 "Enter Chi-Squared Statistic",
                 value = 1,
                 min = 0,
-                max = NA,
+                max = Inf,
                 step = 0.25
             ),
             # Arrow icons radio buttons
@@ -505,20 +505,10 @@ server <- function(input, output, session) {
 
     observe({
         #### Input Access Objects ####
-        z <-
-            ifelse(
-                input$norm_tail == "middle" | input$norm_tail == "two",
-                ifelse(input$z == 0, 0.01, input$z),
-                input$z
-            )
+        z <- input$z
         nt <- input$norm_tail
         na <- input$norm_arrow
-        nu <- ifelse(
-            input$norm_area > 0 & input$norm_area < 1,
-            input$norm_area,
-            ifelse(input$norm_area == 0 |
-                       input$norm_area < 0, 0.01, 0.99)
-        )
+        nu <- input$norm_area
         act <- input$action
         x <- input$dist
         y <- input$par
@@ -585,19 +575,19 @@ server <- function(input, output, session) {
             if (nt == "left") {
                 round(pnorm(q = z,
                             lower.tail = TRUE),
-                      digits = 10)
+                      digits = 5)
             }
             else if (nt == "right") {
                 round(pnorm(q = z,
                             lower.tail = FALSE),
-                      digits = 10)
+                      digits = 5)
             }
             else if (nt == "middle") {
                 round(pnorm(q = z,
                             lower.tail = TRUE) -
                           pnorm(q = -z,
                                 lower.tail = TRUE),
-                      digits = 10)
+                      digits = 5)
             }
             else if (nt == "two") {
                 round(
@@ -605,7 +595,7 @@ server <- function(input, output, session) {
                           lower.tail = FALSE) +
                         pnorm(q = -z,
                               lower.tail = TRUE),
-                    digits = 10
+                    digits = 5
                 )
             }
         })
@@ -618,12 +608,12 @@ server <- function(input, output, session) {
             if (nt == "left") {
                 round(qnorm(p = nu,
                             lower.tail = TRUE),
-                      digits = 10)
+                      digits = 5)
             }
             else if (nt == "right") {
                 round(qnorm(p = nu,
                             lower.tail = FALSE),
-                      digits = 10)
+                      digits = 5)
             }
             else if (nt == "middle") {
                 round(qnorm(
@@ -634,7 +624,7 @@ server <- function(input, output, session) {
                     sd = 1,
                     lower.tail = TRUE
                 ),
-                digits = 10)
+                digits = 5)
             }
             else if (nt == "two") {
                 round(qnorm(
@@ -643,41 +633,40 @@ server <- function(input, output, session) {
                     sd = 1,
                     lower.tail = FALSE
                 ),
-                digits = 10)
+                digits = 5)
             }
         })
 
         #### norm_area_value ####
         norm_area_value <- reactive({
-            req(z)
+            # req(z)
             #  req(nu)
             if (act == "reset" & na == "down") {
                 c(0)
             }
             else if (act == "reset" & na == "up") {
-                if (nu > 0 & nu < 1) {
+                # if (nu > 0 & nu < 1) {
                     c(nu)
-                }
-                else if (nu == 0) {
-                    c(0.01)
-                }
-                else if (nu == 1) {
-                    c(0.99)
-                }
+                # else if (nu == 0) {
+                #     c(0.01)
+                # }
+                # else if (nu == 1) {
+                #     c(0.99)
+                # }
             }
             else if (act == "go" & na == "down") {
-                c(round(norm_area_fun(), 10))
+                c(round(norm_area_fun(), 5))
             }
             else if (act == "go" & na == "up") {
-                if (nu > 0 & nu < 1) {
+                # if (nu > 0 & nu < 1) {
                     c(nu)
-                }
-                else if (nu == 0) {
-                    c(0.01)
-                }
-                else if (nu == 1) {
-                    c(0.99)
-                }
+                # }
+                # else if (nu == 0) {
+                #     c(0.01)
+                # }
+                # else if (nu == 1) {
+                #     c(0.99)
+                # }
             }
         })
         #### norm_area_label ####
@@ -694,14 +683,14 @@ server <- function(input, output, session) {
         #### z_value ####
         z_value <- reactive({
             #    req(z)
-            req(nu)
+            # req(nu)
             if (na == "up") {
                 if (act == "reset") {
                     c(0)
                 }
                 else {
                     # if action button is go
-                    c(round(z_fun(), 10))
+                    c(round(z_fun(), 5))
                 }
             }
             else {
@@ -755,7 +744,7 @@ server <- function(input, output, session) {
         nu_min <- reactive({
             req(z)
             if (na == "down") {
-                c(round(norm_area_fun(), 10))
+                c(round(norm_area_fun(), 5))
             }
             else if (na == "up") {
                 c(0)
@@ -765,7 +754,7 @@ server <- function(input, output, session) {
         nu_max <- reactive({
             req(z)
             if (na == "down") {
-                c(round(norm_area_fun(), 10))
+                c(round(norm_area_fun(), 5))
             }
             else if (na == "up") {
                 c(1)
@@ -781,12 +770,12 @@ server <- function(input, output, session) {
                     c(0)
                 }
                 else {
-                    c(round(z_fun(), 10))
+                    c(round(z_fun(), 5))
                 }
             }
             else if (na == "down") {
                 if (nt == "left" | nt == "right") {
-                    c(NA)
+                    c(-Inf)
                 }
                 else if (nt == "middle" | nt == "two") {
                     c(0)
@@ -800,14 +789,14 @@ server <- function(input, output, session) {
             req(nu)
             if (na == "up") {
                 if (act == "go") {
-                    c(round(z_fun(), 10))
+                    c(round(z_fun(), 5))
                 }
                 else {
                     c(0)
                 }
             }
             else if (na == "down") {
-                c(NA)
+                c(Inf)
             }
         })
         #### norm_plot_area_label ####
@@ -1000,7 +989,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = TRUE
                 ),
-                digits = 10)
+                digits = 5)
             }
             else if (tt == "right") {
                 round(pt(
@@ -1008,7 +997,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = FALSE
                 ),
-                digits = 10)
+                digits = 5)
             }
             else if (tt == "middle") {
                 round(
@@ -1022,7 +1011,7 @@ server <- function(input, output, session) {
                             df = df,
                             lower.tail = TRUE
                         ),
-                    digits = 10
+                    digits = 5
                 )
             }
             else if (tt == "two") {
@@ -1037,7 +1026,7 @@ server <- function(input, output, session) {
                             df = df,
                             lower.tail = TRUE
                         ),
-                    digits = 10
+                    digits = 5
                 )
             }
         })
@@ -1054,7 +1043,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = TRUE
                 ),
-                digits = 10)
+                digits = 5)
             }
             else if (tt == "right") {
                 round(qt(
@@ -1062,7 +1051,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = FALSE
                 ),
-                digits = 10)
+                digits = 5)
             }
             else if (tt == "middle") {
                 round(qt(
@@ -1072,7 +1061,7 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = TRUE
                 ),
-                digits = 10)
+                digits = 5)
             }
             else if (tt == "two") {
                 round(qt(
@@ -1080,32 +1069,32 @@ server <- function(input, output, session) {
                     df = df,
                     lower.tail = FALSE
                 ),
-                digits = 10)
+                digits = 5)
             }
         })
 
         #### t_area_value ####
         t_area_value <- reactive({
-            req(t)
-            req(df)
+            # req(t)
+            # req(df)
             if (ta == "down") {
                 if (tact == "reset") {
                     c(0)
                 }
                 else {
-                    c(round(t_area_fun(), 10))
+                    c(round(t_area_fun(), 5))
                 }
             }
             else if (ta == "up") {
-                    if (tu > 0 & tu < 1) {
+                    # if (tu > 0 & tu < 1) {
                         c(tu)
-                    }
-                    else if (tu == 0) {
-                        c(0.01)
-                    }
-                    else if (tu == 1) {
-                        c(0.99)
-                    }
+                    # }
+                    # else if (tu == 0) {
+                    #     c(0.01)
+                    # }
+                    # else if (tu == 1) {
+                    #     c(0.99)
+                    # }
             }
         })
         #### t_area_label ####
@@ -1123,14 +1112,14 @@ server <- function(input, output, session) {
 
         # t_value ####
         t_value <- reactive({
-            req(tu)
-            req(df)
+            # req(tu)
+            # req(df)
             if (ta == "up") {
                 if (tact == "reset") {
                     c(0)
                 }
                 else { # if action button is go
-                    c(round(t_fun(), 10))
+                    c(round(t_fun(), 5))
                 }
                 # if (tu > 0 & tu < 1) {
                 #     c(round(t_fun(), 5))
@@ -1178,7 +1167,7 @@ server <- function(input, output, session) {
             req(df)
             req(tu)
             if (ta == "down") {
-                c(round(t_area_fun(), 10))
+                c(round(t_area_fun(), 5))
             }
             else if (ta == "up") {
                 c(0)
@@ -1194,7 +1183,7 @@ server <- function(input, output, session) {
                     c(0)
                 }
                 else {
-                    c(round(t_area_fun(), 10))
+                    c(round(t_area_fun(), 5))
                 }
             }
             else if (ta == "up") {
@@ -1211,12 +1200,12 @@ server <- function(input, output, session) {
                     c(0)
                 }
                 else { # if action is go
-                    c(round(t_fun(), 10))
+                    c(round(t_fun(), 5))
                 }
             }
             else {
                 if (tt == "left" | tt == "right") {
-                    c(NA)
+                    c(-Inf)
                 }
                 else if (tt == "middle" | tt == "two") {
                     c(0)
@@ -1233,11 +1222,11 @@ server <- function(input, output, session) {
                     c(0)
                 }
                 else {
-                    c(round(t_fun(), 10))
+                    c(round(t_fun(), 5))
                 }
             }
             else {
-                c(NA)
+                c(Inf)
             }
         })
         #### t_plot_area_label ####
@@ -1245,7 +1234,6 @@ server <- function(input, output, session) {
             req(t)
             req(tu)
             req(df)
-
             if (ta == "up") {
                 paste0("Area: ", round(t_area_fun(), 6) * 100, "%")
             }
@@ -1468,11 +1456,11 @@ server <- function(input, output, session) {
                     c(0)
                 }
                 else {
-                    c(round(chi_area_fun(), 10))
+                    c(round(chi_area_fun(), 5))
                 }
             }
             else if (chia == "up") {
-                c(round(chiu, 10))
+                c(chiu)
             }
         })
 
@@ -1489,15 +1477,15 @@ server <- function(input, output, session) {
         })
         #### chi_value ####
         chi_value <- reactive({
-            req(chiu)
-            req(chidf)
-            req(chi)
+            # req(chiu)
+            # req(chidf)
+            # req(chi)
             if (chia == "up") {
                 if (cact == "reset") {
                     c(0)
                 }
                 else {
-                    c(round(chi_fun(), 2))
+                    c(round(chi_fun(), 5))
                 }
             }
             else if (chia == "down") {
@@ -1522,7 +1510,7 @@ server <- function(input, output, session) {
             req(chidf)
             req(chiu)
             if (chia == "down") {
-                c(round(chi_area_fun(), 2))
+                c(round(chi_area_fun(), 5))
             }
             else if (chia == "up") {
                 c(0)
@@ -1534,7 +1522,7 @@ server <- function(input, output, session) {
             req(chidf)
             req(chiu)
             if (chia == "down") {
-                c(round(chi_area_fun(), 2))
+                c(round(chi_area_fun(), 5))
             }
             else if (chia == "up") {
                 c(1)
@@ -1550,7 +1538,7 @@ server <- function(input, output, session) {
                     c(0)
                 }
                 else {
-                    c(round(chi_fun(), 10))
+                    c(round(chi_fun(), 5))
                 }
             }
             else if (chia == "down") {
@@ -1567,11 +1555,11 @@ server <- function(input, output, session) {
                     c(0)
                 }
                 else {
-                    c(round(chi_fun(), 10))
+                    c(round(chi_fun(), 5))
                 }
             }
             else if (chia == "down") {
-                c(NA)
+                c(Inf)
             }
         })
 
