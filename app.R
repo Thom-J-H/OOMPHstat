@@ -231,7 +231,7 @@ chi_input_box <- box(
     status = "warning",
     solidHeader = TRUE,
     collapsible = TRUE,
-    width = 3,
+    width = 4,
     footer = h4(em("Make sure Chi-Squared Statistic and Area are not blank before clicking Submit"), style = "text-align:center"),
     verticalLayout(
         # Tail type radio buttons box
@@ -258,7 +258,7 @@ chi_input_box <- box(
                 value = 1,
                 min = 0,
                 max = Inf,
-                step = 0.25
+                step = 1
             ),
             # Arrow icons radio buttons
             radioButtons(
@@ -297,21 +297,11 @@ chi_plot_box <- box(
     status = "primary",
     solidHeader = TRUE,
     collapsible = TRUE,
-    width = 6
-)
-
-chi_values_box <- box(
-    plotOutput("chi_footer"),
-    title = "Values",
-    status = "warning",
-    solidHeader = TRUE,
-    collapsible = TRUE,
-    width = 3
-
+    width = 8
 )
 
 # 3. chi first row
-chi_row1 <- fluidRow(chi_input_box, chi_plot_box, chi_values_box)
+chi_row1 <- fluidRow(chi_input_box, chi_plot_box)
 
 # 4. chi Distribution tab
 chi_tab <- tabItem(tabName = "chitab",
@@ -499,7 +489,7 @@ ui <- dashboardPage(header, sidebar, body)
 
 server <- function(input, output, session) {
     xvalues <- data.frame(x = c(-3, 3))
-    chixvalues <- data.frame(chix = c(-2, 6))
+    chixvalues <- data.frame(chix = c(0, 100))
     val_box <- data.frame(x = c(0, 4))
 
 
@@ -1404,7 +1394,7 @@ server <- function(input, output, session) {
             req(chi)
             req(chidf)
             req(chiu)
-            function(x) {
+            function(x, df) {
                 chi_den <- dchisq(x, df = chidf)
                 return(chi_den)
             }
@@ -1413,10 +1403,11 @@ server <- function(input, output, session) {
             req(chi)
             req(chidf)
             req(chiu)
-            function(x) {
+            function(x, df) {
                 chisq_right <- dchisq(x, df = chidf)
                 chisq_right[x < chi] <- NA
-                #| chi > 6] <- NA
+                chisq_right[x < 0] <- NA
+                chisq_right[x > 100] <- NA
                 return(chisq_right)
             }
         })
@@ -1426,12 +1417,13 @@ server <- function(input, output, session) {
         chi_area_fun <- reactive({
             req(chidf)
             req(chi)
+            req(chiu)
             round(pchisq(
                 q = chi,
                 df = chidf,
                 lower.tail = FALSE
             ),
-            digits = 5)
+            digits = 10)
         })
 
         #### chi_fun ####
@@ -1439,24 +1431,26 @@ server <- function(input, output, session) {
         chi_fun <- reactive({
             req(chidf)
             req(chiu)
+            req(chi)
             round(qchisq(
                 p = chiu,
                 df = chidf,
                 lower.tail = FALSE
             ),
-            digits = 5)
+            digits = 10)
         })
 
         #### chi_area_value ####
         chi_area_value <- reactive({
             req(chi)
             req(chidf)
+            req(chiu)
             if (chia == "down") {
                 if (cact == "reset") {
                     c(0)
                 }
                 else {
-                    c(round(chi_area_fun(), 5))
+                    c(round(chi_area_fun(), 10))
                 }
             }
             else if (chia == "up") {
@@ -1477,15 +1471,15 @@ server <- function(input, output, session) {
         })
         #### chi_value ####
         chi_value <- reactive({
-            # req(chiu)
-            # req(chidf)
-            # req(chi)
+            req(chiu)
+            req(chidf)
+            req(chi)
             if (chia == "up") {
                 if (cact == "reset") {
                     c(0)
                 }
                 else {
-                    c(round(chi_fun(), 5))
+                    c(round(chi_fun(), 10))
                 }
             }
             else if (chia == "down") {
@@ -1510,7 +1504,7 @@ server <- function(input, output, session) {
             req(chidf)
             req(chiu)
             if (chia == "down") {
-                c(round(chi_area_fun(), 5))
+                c(round(chi_area_fun(), 10))
             }
             else if (chia == "up") {
                 c(0)
@@ -1522,7 +1516,7 @@ server <- function(input, output, session) {
             req(chidf)
             req(chiu)
             if (chia == "down") {
-                c(round(chi_area_fun(), 5))
+                c(round(chi_area_fun(), 10))
             }
             else if (chia == "up") {
                 c(1)
@@ -1538,7 +1532,7 @@ server <- function(input, output, session) {
                     c(0)
                 }
                 else {
-                    c(round(chi_fun(), 5))
+                    c(round(chi_fun(), 10))
                 }
             }
             else if (chia == "down") {
@@ -1555,7 +1549,7 @@ server <- function(input, output, session) {
                     c(0)
                 }
                 else {
-                    c(round(chi_fun(), 5))
+                    c(round(chi_fun(), 10))
                 }
             }
             else if (chia == "down") {
@@ -1568,11 +1562,11 @@ server <- function(input, output, session) {
             req(chiu)
             req(chidf)
             if (chia == "up") {
-                bquote("Area: " ~ .(round(chi_area_fun(), 6) * 100) ~ "%")
+                paste0("Area: ", (round(chi_area_fun(), 6) * 100), "%")
             }
             else {
                 if ((round(chi_area_fun(), 6) * 100) < 0.01) {
-                    bquote("Area: " ~ .(c(
+                    paste0("Area: ", (c(
                         formatC(
                             chi_area_fun(),
                             format = "e",
@@ -1581,8 +1575,7 @@ server <- function(input, output, session) {
                     )))
                 }
                 else {
-                    paste0("Area: ",
-                           round(chi_area_fun(), 6) * 100, "%")
+                    paste0("Area: ", (round(chi_area_fun(), 6) * 100), "%")
                 }
             }
         })
@@ -1613,9 +1606,11 @@ server <- function(input, output, session) {
             min = chiu_min(),
             max = chiu_max()
         )
-
         #### CHI PLOT ####
         if (cact == "go") {
+            req(chi)
+            req(chiu)
+            req(chidf)
             output$chiPlot <- renderPlot({
                 ggplot(chixvalues, aes(x = chix)) +
                     stat_function(fun = dchisq_density(),
@@ -1646,12 +1641,42 @@ server <- function(input, output, session) {
                         panel.grid.minor = element_blank(),
                         panel.grid.major = element_blank()
                     ) +
-                    scale_x_continuous(limits = c(0, 6),
-                                       breaks = c(0, 1, 2, 3, 4, 5, 6)) +
+                    geom_text(
+                        x = ifelse(chi+25<90,
+                                   chi + 25,
+                                   chi - 25),
+                        y = ifelse(chidf<25, .35/chidf, .35/25),
+                        size = 6,
+                        fontface = "bold",
+                        colour = "brown",
+                        label = chi_plot_area_label()
+                    ) +
+                    geom_text(
+                        x = ifelse(chi+25<90,
+                                   chi + 25,
+                                   chi - 25),
+                        y = ifelse(chidf<25, .25/chidf, .25/25),
+                        size = 6,
+                        fontface = "bold",
+                        colour = "brown",
+                        label = bquote(bold(paste(
+                            chi ^ 2 ~ ": " ~
+                                .(formatC(
+                                    round(chi, 5),
+                                    format = "f",
+                                    digits = 5
+                                ))
+                        )))
+                    ) +
+                    scale_x_continuous(limits = c(0, 100),
+                                       breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
                     scale_y_continuous(breaks = NULL)
             })
         }
         else {
+            req(chi)
+            req(chiu)
+            req(chidf)
             output$chiPlot <- renderPlot({
                 ggplot(chixvalues, aes(x = chix)) +
                     stat_function(fun = dchisq_density(),
@@ -1660,7 +1685,7 @@ server <- function(input, output, session) {
                         "Chi-Squared Statistic ", "(", chi ^ 2, ")"
                     )),
                     y = "",
-                    title = chi_plot_title()) +
+                    title = "Chi-Squared Distribution") +
                     theme(
                         plot.title = element_text(# face = "bold",
                             size = 18,
@@ -1676,93 +1701,9 @@ server <- function(input, output, session) {
                         panel.grid.minor = element_blank(),
                         panel.grid.major = element_blank()
                     ) +
-                    scale_x_continuous(limits = c(0, 6),
-                                       breaks = c(0, 1, 2, 3, 4, 5, 6)) +
+                    scale_x_continuous(limits = c(0, 100),
+                                       breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
                     scale_y_continuous(breaks = NULL)
-            })
-        }
-
-        #### chi_footer ####
-        if (cact == "go") {
-            output$chi_footer <- renderPlot({
-                req(chi)
-                req(chidf)
-                req(chiu)
-                ggplot(val_box, aes(x = x)) +
-                    stat_function(fun = dnorm,
-                                  size = .9,
-                    ) +
-                    geom_text(
-                        x = 3,
-                        y = 0.2,
-                        size = 6,
-                        fontface = "bold",
-                        colour = "brown",
-                        label = chi_plot_area_label()
-                    ) +
-                    geom_text(
-                        x = 3,
-                        y = 0.15,
-                        size = 6,
-                        fontface = "bold",
-                        colour = "brown",
-                        label = bquote(bold(paste(
-                            chi ^ 2 ~ ": " ~
-                                .(formatC(
-                                    round(chi, 5),
-                                    format = "f",
-                                    digits = 5
-                                ))
-                        )))
-                    ) +
-                    theme(
-                        panel.grid.minor = element_blank(),
-                        panel.grid.major = element_blank()
-                    ) +
-                    scale_x_continuous(breaks = NULL) +
-                    scale_y_continuous(breaks = NULL) +
-                    labs(x = NULL, y = NULL)
-            })
-        }
-        else {
-            output$chi_footer <- renderPlot({
-                req(chi)
-                req(chidf)
-                req(chiu)
-                ggplot(val_box, aes(x = x)) +
-                    stat_function(fun = dnorm,
-                                  size = .9,
-                    ) +
-                    # geom_text(
-                    #     x = 3,
-                    #     y = 0.2,
-                    #     size = 6,
-                    #     fontface = "bold",
-                    #     colour = "brown",
-                    #     label = chi_plot_area_label()
-                    # ) +
-                    # geom_text(
-                    #     x = 3,
-                    #     y = 0.15,
-                    #     size = 6,
-                    #     fontface = "bold",
-                    #     colour = "brown",
-                    #     label = bquote(bold(paste(
-                    #         chi ^ 2 ~ ": " ~
-                    #             .(formatC(
-                    #                 round(chi, 4),
-                    #                 format = "f",
-                    #                 digits = 4
-                    #             ))
-                    #     )))
-                    # ) +
-                    theme(
-                        panel.grid.minor = element_blank(),
-                        panel.grid.major = element_blank()
-                    ) +
-                    scale_x_continuous(breaks = NULL) +
-                    scale_y_continuous(breaks = NULL) +
-                    labs(x = NULL, y = NULL)
             })
         }
 
