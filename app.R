@@ -101,7 +101,6 @@ norm_input_box <- box(
                         "Clear" = "reset"),
             selected = "reset"
         )
-        # )
     )
 )
 
