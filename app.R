@@ -13,7 +13,9 @@
 #                                                                             #
 #   Course: PBHLTH W142                                                       #
 #           Statistics and Probability for Biology and Public Health          #
-#           Professor Maureen Lahiff, Ph.D.                                   #
+#           Professor Maureen Lahiff, Ph.D., lahiff@berkeley.edu              #
+#           Online/On-Campus Master of Public Health Program (OOMPH)          #
+#           School of Public Health                                           #
 #           University of California, Berkeley                                #
 #                                                                             #
 #   ----------------------------------------------------------------------    #
@@ -44,13 +46,8 @@ norm_input_box <- box(
     solidHeader = TRUE,
     collapsible = TRUE,
     width = 4,
-    footer = h4(
-        em("Make sure Z-Score and Area are not blank before clicking Submit"),
-        style = "text-align:center"
-    ),
     verticalLayout(
         # Tail type radio buttons box
-        # box(
         radioButtons(
             "norm_tail",
             "Type",
@@ -60,11 +57,9 @@ norm_input_box <- box(
                 "Central Area" = "middle",
                 "Two-Tailed" = "two"
             ),
-            selected = "left"
+            selected = "left",
+            inline = FALSE
         ),
-        # ),
-        # Numeric inputs box
-        # box(
         # Z-score numeric input widget
         numericInput(
             "z",
@@ -99,7 +94,20 @@ norm_input_box <- box(
             NULL,
             choices = c("Submit" = "go",
                         "Clear" = "reset"),
-            selected = "reset"
+            selected = "reset",
+            inline = TRUE
+        ),
+        box(
+            title = "Notes",
+            status = "danger",
+            solidHeader = FALSE,
+            h4(
+                em("Make sure Z-Score and Area are not blank before clicking Submit"),
+                style = "text-align:center"
+            ),
+            collapsible = TRUE,
+            collapsed = TRUE,
+            width = 12
         )
     )
 )
@@ -133,15 +141,8 @@ t_input_box <- box(
     solidHeader = TRUE,
     collapsible = TRUE,
     width = 4,
-    footer = h4(
-        em(
-            "Make sure t-statistic and Area are not blank before clicking Submit"
-        ),
-        style = "text-align:center"
-    ),
     verticalLayout(
         # Tail type radio buttons box
-        # box(
         radioButtons(
             "t_tail",
             "Type",
@@ -161,8 +162,6 @@ t_input_box <- box(
             max = Inf,
             step = 1
         ),
-        # Numeric inputs left box
-        # box(
         # T-statistic numeric input widget
         numericInput(
             "t",
@@ -197,7 +196,22 @@ t_input_box <- box(
             NULL,
             choices = c("Submit" = "go",
                         "Clear" = "reset"),
-            selected = "reset"
+            selected = "reset",
+            inline = TRUE
+        ),
+        box(
+            title = "Notes",
+            status = "danger",
+            solidHeader = FALSE,
+            h4(
+                em(
+                    "Make sure t-statistic and Area are not blank before clicking Submit"
+                ),
+                style = "text-align:center"
+            ),
+            collapsible = TRUE,
+            collapsed = TRUE,
+            width = 12
         )
     )
 )
@@ -231,61 +245,73 @@ chi_input_box <- box(
     solidHeader = TRUE,
     collapsible = TRUE,
     width = 4,
-    footer = h4(em("Make sure Chi-Squared Statistic and Area are not blank before clicking Submit"), style = "text-align:center"),
     verticalLayout(
         # Tail type radio buttons box
-            radioButtons(
-                "chi_tail",
-                "Type",
-                choices = c("Right-Tailed" = "right"),
-                selected = "right"
+        radioButtons(
+            "chi_tail",
+            "Type",
+            choices = c("Right-Tailed" = "right"),
+            selected = "right"
+        ),
+        numericInput(
+            "chidf",
+            "Enter Degrees of Freedom",
+            value = 2,
+            min = 2,
+            max = Inf,
+            step = 1
+        ),
+        # Chi-squared-statistic numeric input widget
+        numericInput(
+            "chi",
+            "Enter Chi-Squared Statistic",
+            value = 1,
+            min = 0,
+            max = Inf,
+            step = 1
+        ),
+        # Arrow icons radio buttons
+        radioButtons(
+            "chi_arrow",
+            NULL,
+            choiceNames = list(icon("arrow-up"),
+                               icon("arrow-down")),
+            choiceValues = list("up",
+                                "down"),
+            inline = TRUE,
+            selected = "down"
+        ),
+        # Area numeric inputs widget
+        numericInput(
+            "chi_area",
+            "Area Under the Curve",
+            value = 0,
+            min = 0,
+            max = 1,
+            step = 0.01
+        ),
+        radioButtons(
+            "chi_action",
+            NULL,
+            choices = c("Submit" = "go",
+                        "Clear" = "reset"),
+            selected = "reset",
+            inline = TRUE
+        ),
+        box(
+            title = "Notes",
+            status = "danger",
+            solidHeader = FALSE,
+            h4(
+                em(
+                    "Make sure Chi-Squared Statistic and Area are not blank before clicking Submit"
+                ),
+                style = "text-align:center"
             ),
-            numericInput(
-                "chidf",
-                "Enter Degrees of Freedom",
-                value = 2,
-                min = 2,
-                max = Inf,
-                step = 1
-            ),
-        # Numeric inputs left box
-        # box(
-            # Chi-squared-statistic numeric input widget
-            numericInput(
-                "chi",
-                "Enter Chi-Squared Statistic",
-                value = 1,
-                min = 0,
-                max = Inf,
-                step = 1
-            ),
-            # Arrow icons radio buttons
-            radioButtons(
-                "chi_arrow",
-                NULL,
-                choiceNames = list(icon("arrow-up"),
-                                   icon("arrow-down")),
-                choiceValues = list("up",
-                                    "down"),
-                inline = TRUE,
-                selected = "down"
-            ),
-            # Area numeric inputs widget
-            numericInput(
-                "chi_area",
-                "Area Under the Curve",
-                value = 0,
-                min = 0,
-                max = 1,
-                step = 0.01
-            ),
-            radioButtons(
-                "chi_action",
-                NULL,
-                choices = c("Submit" = "go",
-                            "Clear" = "reset"),
-                selected = "reset"
-            )
+            collapsible = TRUE,
+            collapsed = TRUE,
+            width = 12
+        )
     )
 )
 
@@ -317,23 +343,36 @@ source_contact_box <- box(
     collapsible = TRUE,
     collapsed = FALSE,
     solidHeader = TRUE,
-    status = "success"
+    status = "primary",
+    width = 6
 )
 
 # Source tab R Source Code box
 source_code_box <- box(
     title = "Code",
-    uiOutput("code"),
+    p(uiOutput("code")),
     collapsible = TRUE,
     collapsed = FALSE,
     solidHeader = TRUE,
-    status = "danger"
+    status = "success",
+    width = 6
 )
 
-source_row1 <- verticalLayout(source_code_box, source_contact_box)
+source_course_box <- box(
+    title = "Course",
+    p(uiOutput("course")),
+    collapsible = TRUE,
+    collapsed = FALSE,
+    solidHeader = TRUE,
+    status = "warning",
+    width = 6
+)
+
+source_row1 <-
+    fluidRow(source_course_box, source_contact_box, source_code_box)
 
 source_tab <- tabItem(tabName = "source",
-                      h2("Project Info"),
+                      h2("App Info"),
                       source_row1)
 
 
@@ -347,8 +386,6 @@ clt_input_box <- box(
     solidHeader = TRUE,
     collapsible = TRUE,
     width = 4,
-    # verticalLayout(
-    # box(
     # Pop. parameter radio buttons box
     radioButtons(
         inputId = "par",
@@ -382,9 +419,6 @@ clt_input_box <- box(
         ),
         selected = "age"
     ),
-    # ),
-    # Slider inputs box
-    # box(
     # Source pop. size slider input
     sliderInput(
         "pop_size",
@@ -412,8 +446,6 @@ clt_input_box <- box(
         min = 10,
         max = 1000
     )
-    # )
-    # )
 )
 
 # 2. CLT blue Plot box
@@ -462,7 +494,7 @@ sidebar <- dashboardSidebar(sidebarMenu(
         icon = icon("align-center")
     ),
     menuItem(
-        "Project Info",
+        "App Info",
         tabName = "source",
         icon = icon("laptop-code")
     )
@@ -519,11 +551,9 @@ server <- function(input, output, session) {
 
         #### NORMAL DISTRIBUTION SERVER LOGIC ####
 
-            #### dnorm_tail ####
+        #### dnorm_tail ####
         # ggplot statistical function for shading area under Normal curve
         dnorm_tail <- reactive({
-            # req(z)
-            # req(nu)
             if (nt == "left") {
                 function(x) {
                     norm_left <- dnorm(x)
@@ -560,7 +590,6 @@ server <- function(input, output, session) {
             req(na)
             req(act)
             req(z)
-            #   req(nu)
             if (nt == "left") {
                 round(pnorm(q = z,
                             lower.tail = TRUE),
@@ -592,7 +621,6 @@ server <- function(input, output, session) {
         #### z_fun ####
         # function to compute t-statistic from area under the curve
         z_fun <- reactive({
-            # req(z)
             req(nu)
             if (nt == "left") {
                 round(qnorm(p = nu,
@@ -628,34 +656,17 @@ server <- function(input, output, session) {
 
         #### norm_area_value ####
         norm_area_value <- reactive({
-            # req(z)
-            #  req(nu)
             if (act == "reset" & na == "down") {
                 c(0)
             }
             else if (act == "reset" & na == "up") {
-                # if (nu > 0 & nu < 1) {
-                    c(nu)
-                # else if (nu == 0) {
-                #     c(0.01)
-                # }
-                # else if (nu == 1) {
-                #     c(0.99)
-                # }
+                c(nu)
             }
             else if (act == "go" & na == "down") {
                 c(round(norm_area_fun(), 5))
             }
             else if (act == "go" & na == "up") {
-                # if (nu > 0 & nu < 1) {
-                    c(nu)
-                # }
-                # else if (nu == 0) {
-                #     c(0.01)
-                # }
-                # else if (nu == 1) {
-                #     c(0.99)
-                # }
+                c(nu)
             }
         })
         #### norm_area_label ####
@@ -671,8 +682,6 @@ server <- function(input, output, session) {
         })
         #### z_value ####
         z_value <- reactive({
-            #    req(z)
-            # req(nu)
             if (na == "up") {
                 if (act == "reset") {
                     c(0)
@@ -862,10 +871,12 @@ server <- function(input, output, session) {
                                        ))
                     ) +
                     theme(
-                        plot.title = element_text(# face = "bold",
+                        plot.title = element_text(
+                            # face = "bold",
                             size = 18,
                             hjust = 0.5),
-                        axis.title.x = element_text(# face = "bold",
+                        axis.title.x = element_text(
+                            # face = "bold",
                             colour = "brown",
                             size = 16),
                         axis.title.y = element_text(
@@ -891,10 +902,12 @@ server <- function(input, output, session) {
                         title = bquote("Standard Normal Distribution")
                     ) +
                     theme(
-                        plot.title = element_text(# face = "bold",
+                        plot.title = element_text(
+                            # face = "bold",
                             size = 18,
                             hjust = 0.5),
-                        axis.title.x = element_text(# face = "bold",
+                        axis.title.x = element_text(
+                            # face = "bold",
                             colour = "brown",
                             size = 16),
                         axis.title.y = element_text(
@@ -1064,8 +1077,6 @@ server <- function(input, output, session) {
 
         #### t_area_value ####
         t_area_value <- reactive({
-            # req(t)
-            # req(df)
             if (ta == "down") {
                 if (tact == "reset") {
                     c(0)
@@ -1075,15 +1086,7 @@ server <- function(input, output, session) {
                 }
             }
             else if (ta == "up") {
-                    # if (tu > 0 & tu < 1) {
-                        c(tu)
-                    # }
-                    # else if (tu == 0) {
-                    #     c(0.01)
-                    # }
-                    # else if (tu == 1) {
-                    #     c(0.99)
-                    # }
+                c(tu)
             }
         })
         #### t_area_label ####
@@ -1101,23 +1104,17 @@ server <- function(input, output, session) {
 
         # t_value ####
         t_value <- reactive({
-            # req(tu)
-            # req(df)
             if (ta == "up") {
                 if (tact == "reset") {
                     c(0)
                 }
-                else { # if action button is go
+                else {
+                    # if action button is go
                     c(round(t_fun(), 5))
                 }
-                # if (tu > 0 & tu < 1) {
-                #     c(round(t_fun(), 5))
-                # }
-                # else {
-                #     c(1)
-                # }
             }
-            else { # if arrow is down
+            else {
+                # if arrow is down
                 if (tact == "reset") {
                     if (tt == "left" | tt == "right") {
                         c(t)
@@ -1188,7 +1185,8 @@ server <- function(input, output, session) {
                 if (act == "reset") {
                     c(0)
                 }
-                else { # if action is go
+                else {
+                    # if action is go
                     c(round(t_fun(), 5))
                 }
             }
@@ -1308,9 +1306,10 @@ server <- function(input, output, session) {
                         alpha = 0.5
                     ) +
                     xlab(expression(italic("t") ~ "-statistic (t)")) +
-                    labs(# x = " \n t-statistic (t)",
+                    labs(
                         y = "",
-                        title = t_plot_title()) +
+                        title = t_plot_title()
+                    ) +
                     geom_text(
                         x = 2.1,
                         y = 0.3,
@@ -1333,10 +1332,12 @@ server <- function(input, output, session) {
                                        ))
                     ) +
                     theme(
-                        plot.title = element_text(# face = "bold",
+                        plot.title = element_text(
+                            # face = "bold",
                             size = 18,
                             hjust = 0.5),
-                        axis.title.x = element_text(# face = "bold",
+                        axis.title.x = element_text(
+                            # face = "bold",
                             colour = "brown",
                             size = 16),
                         axis.title.y = element_text(
@@ -1347,8 +1348,10 @@ server <- function(input, output, session) {
                         panel.grid.minor = element_blank(),
                         panel.grid.major = element_blank()
                     ) +
-                    scale_x_continuous(limits = c(-4, 4),
-                                       breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4)) +
+                    scale_x_continuous(
+                        limits = c(-4, 4),
+                        breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4)
+                    ) +
                     scale_y_continuous(breaks = NULL)
             })
         }
@@ -1358,14 +1361,17 @@ server <- function(input, output, session) {
                     stat_function(fun = dt_density(),
                                   size = .9) +
                     xlab(expression(italic("t") ~ "-statistic (t)")) +
-                    labs(# x = " \n t-statistic (t)",
+                    labs(
                         y = "",
-                        title = t_plot_title()) +
+                        title = t_plot_title()
+                    ) +
                     theme(
-                        plot.title = element_text(# face = "bold",
+                        plot.title = element_text(
+                            # face = "bold",
                             size = 18,
                             hjust = 0.5),
-                        axis.title.x = element_text(# face = "bold",
+                        axis.title.x = element_text(
+                            # face = "bold",
                             colour = "brown",
                             size = 16),
                         axis.title.y = element_text(
@@ -1376,8 +1382,10 @@ server <- function(input, output, session) {
                         panel.grid.minor = element_blank(),
                         panel.grid.major = element_blank()
                     ) +
-                    scale_x_continuous(limits = c(-4, 4),
-                                       breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4)) +
+                    scale_x_continuous(
+                        limits = c(-4, 4),
+                        breaks = c(-4, -3, -2, -1, 0, 1, 2, 3, 4)
+                    ) +
                     scale_y_continuous(breaks = NULL)
             })
         }
@@ -1574,7 +1582,8 @@ server <- function(input, output, session) {
                     )))
                 }
                 else {
-                    paste0("Area: ", (round(chi_area_fun(), 6) * 100), "%")
+                    paste0("Area: ", (round(chi_area_fun(
+                    ), 6) * 100), "%")
                 }
             }
         })
@@ -1620,16 +1629,18 @@ server <- function(input, output, session) {
                         fill = "green",
                         alpha = 0.5
                     ) +
-                    labs(x = expression(paste(
-                        "Chi-Squared Statistic ", "(", chi ^ 2, ")"
-                    )),
+                    labs(x = expression(
+                        paste("Chi-Squared Statistic ", "(", chi ^ 2, ")")
+                    ),
                     y = "",
                     title = chi_plot_title()) +
                     theme(
-                        plot.title = element_text(# face = "bold",
+                        plot.title = element_text(
+                            # face = "bold",
                             size = 18,
                             hjust = 0.5),
-                        axis.title.x = element_text(# face = "bold",
+                        axis.title.x = element_text(
+                            # face = "bold",
                             colour = "brown",
                             size = 16),
                         axis.title.y = element_text(
@@ -1641,20 +1652,20 @@ server <- function(input, output, session) {
                         panel.grid.major = element_blank()
                     ) +
                     geom_text(
-                        x = ifelse(chi+25<90,
+                        x = ifelse(chi + 25 < 90,
                                    chi + 25,
                                    chi - 25),
-                        y = ifelse(chidf<25, .35/chidf, .35/25),
+                        y = ifelse(chidf < 25, .35 / chidf, .35 / 25),
                         size = 6,
                         fontface = "bold",
                         colour = "brown",
                         label = chi_plot_area_label()
                     ) +
                     geom_text(
-                        x = ifelse(chi+25<90,
+                        x = ifelse(chi + 25 < 90,
                                    chi + 25,
                                    chi - 25),
-                        y = ifelse(chidf<25, .25/chidf, .25/25),
+                        y = ifelse(chidf < 25, .25 / chidf, .25 / 25),
                         size = 6,
                         fontface = "bold",
                         colour = "brown",
@@ -1667,8 +1678,10 @@ server <- function(input, output, session) {
                                 ))
                         )))
                     ) +
-                    scale_x_continuous(limits = c(0, 100),
-                                       breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+                    scale_x_continuous(
+                        limits = c(0, 100),
+                        breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+                    ) +
                     scale_y_continuous(breaks = NULL)
             })
         }
@@ -1680,16 +1693,18 @@ server <- function(input, output, session) {
                 ggplot(chixvalues, aes(x = chix)) +
                     stat_function(fun = dchisq_density(),
                                   size = .9) +
-                    labs(x = expression(paste(
-                        "Chi-Squared Statistic ", "(", chi ^ 2, ")"
-                    )),
+                    labs(x = expression(
+                        paste("Chi-Squared Statistic ", "(", chi ^ 2, ")")
+                    ),
                     y = "",
                     title = "Chi-Squared Distribution") +
                     theme(
-                        plot.title = element_text(# face = "bold",
+                        plot.title = element_text(
+                            # face = "bold",
                             size = 18,
                             hjust = 0.5),
-                        axis.title.x = element_text(# face = "bold",
+                        axis.title.x = element_text(
+                            # face = "bold",
                             colour = "brown",
                             size = 16),
                         axis.title.y = element_text(
@@ -1700,8 +1715,10 @@ server <- function(input, output, session) {
                         panel.grid.minor = element_blank(),
                         panel.grid.major = element_blank()
                     ) +
-                    scale_x_continuous(limits = c(0, 100),
-                                       breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+                    scale_x_continuous(
+                        limits = c(0, 100),
+                        breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+                    ) +
                     scale_y_continuous(breaks = NULL)
             })
         }
@@ -1711,9 +1728,6 @@ server <- function(input, output, session) {
 
 
         dist_choices <- reactive({
-            # req(y)
-            # req(x)
-            # req(input$var)
             if (y == "prop") {
                 c("Binomial" = "binom")
             }
@@ -1757,9 +1771,6 @@ server <- function(input, output, session) {
 
 
         var_choices <- reactive({
-            # req(y)
-            # req(x)
-            # req(input$var)
             if (x == "binom") {
                 c("Current Smoker" = "smoke")
             }
@@ -1771,9 +1782,7 @@ server <- function(input, output, session) {
                   "SAT Scores" = "SAT")
             }
             else if (x == "sskew") {
-                c(
-                    "MediCal Costs: Hip & Knee Replacements" = "hip"
-                )
+                c("MediCal Costs: Hip & Knee Replacements" = "hip")
             }
             else {
                 c("Annual Income" = "LA")
@@ -1781,8 +1790,6 @@ server <- function(input, output, session) {
         })
 
         var_selected <- reactive({
-            # req(y)
-            # req(x)
             if (y == "prop") {
                 c("Current Smoker" = "smoke")
             }
@@ -1798,7 +1805,6 @@ server <- function(input, output, session) {
             else {
                 c("Annual Income" = "LA")
             }
-            # c(input$var)
         })
 
         updateSelectInput(
@@ -1809,7 +1815,6 @@ server <- function(input, output, session) {
         )
 
         population <- reactive({
-
             hip <- read_excel("data/medicare.xlsx",
                               col_names = TRUE) %>%
                 filter(
@@ -1876,9 +1881,6 @@ server <- function(input, output, session) {
         }) # population reactive
 
         smpl_mean <- reactive({
-            # req(y)
-            # req(x)
-            # req(input$var)
             for (i in 1:input$iterate) {
                 if (i == 1) {
                     smpl_mean <- c(mean(sample(
@@ -1898,9 +1900,6 @@ server <- function(input, output, session) {
         }) # smpl_mean reactive
 
         ax_choices <- reactive({
-            # req(y)
-            # req(x)
-            # req(input$var)
             if (input$var == "age") {
                 c("Age (Years)")
             }
@@ -1922,9 +1921,6 @@ server <- function(input, output, session) {
         })
 
         titles <- reactive({
-            # req(y)
-            # req(x)
-            # req(input$var)
             if (input$var == "smoke") {
                 c("Sample Proportion Histogram and Density Plot")
             }
@@ -1971,26 +1967,56 @@ server <- function(input, output, session) {
         email <- a("xander@berkeley.edu",
                    href = "mailto:xander@berkeley.edu")
 
-        school <- a("UC Berkeley School of Public Health",
-                    href = "https://publichealth.berkeley.edu/",
-                    target = "_blank")
+        lahiff <- a("Maureen Lahiff",
+                    href = "mailto:lahiff@berkeley.edu")
+
+        oomph <- a("Online/On-Campus MPH Program (OOMPH)",
+                   href = "https://onlinemph.berkeley.edu/",
+                   target = "_blank")
+
+        sph <- a("School of Public Health",
+                 href = "https://publichealth.berkeley.edu/",
+                 target = "_blank")
 
         github <- a("Github.",
                     href = "https://github.com/posnerab/OOMPHstat",
                     target = "_blank")
 
+        shiny <- a("here.",
+                   href = "https://docs.rstudio.com/shinyapps.io/index.html",
+                   target = "_blank")
+
         output$contact <- renderUI({
             tagList(
-                p("© 2020 Xander Posner, ", email),
+                p("Xander Posner, ", email),
                 p("MPH '20 | Epidemiology & Biostatistics"),
-                p(school)
+                p(sph),
+                p("University of California, Berkeley")
             )
         })
 
         output$code <- renderUI({
             tagList(
-                p("This Shiny app was made in RStudio"),
-                p("Check out the source code on ", github)
+                p(code(
+                    "This Shiny app was made in RStudio"
+                )),
+                p("Check out the source code on ", github),
+                p("Learn more about building Shiny apps ", shiny)
+            )
+        })
+
+        output$course <- renderUI({
+            tagList(
+                p(strong("PBHLTH W142")),
+                p(
+                    "Intro to Probability and Statistics in Biology and Public Health"
+                ),
+                p("Professor Maureen Lahiff, Ph.D."),
+                p(oomph),
+                p(sph),
+                p("University of California, Berkeley"),
+                br(""),
+                p(strong("Copyright © 2020 "), lahiff, " / UC Berkeley")
             )
         })
 
