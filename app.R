@@ -1809,9 +1809,6 @@ server <- function(input, output, session) {
         )
 
         population <- reactive({
-            # req(y)
-            # req(x)
-            # req(input$var)
 
             hip <- read_excel("data/medicare.xlsx",
                               col_names = TRUE) %>%
